@@ -1,4 +1,4 @@
-# EthoProfiler
+# DeepEthoProfile
 
 Software to automatically annotate mouse behaviours inside a home cage.
 The solution is based on a CNN that processes stacked frames and classifies first order behaviours
