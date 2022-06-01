@@ -12,6 +12,7 @@ import torch
 from pandas import DataFrame
 
 from DataReader import DataReader
+from StackFrames import getTensors
 
 class ProcessVideo():
     def __init__(self, modelPath, noClasses, videoFile, outputFile, segSize=125): 
@@ -54,8 +55,8 @@ class ProcessVideo():
                 x = reader.getProcessingData(t * self.segSize + 1, self.segSize)
                 if x is -1:
                     break
-                
-                xt,_ = self.model.getTensors(x)
+
+                xt,_ = getTensors(x)
 
             # Forward pass: Compute predicted y by passing x to the model
                 crt_y = self.model(xt)
@@ -63,7 +64,7 @@ class ProcessVideo():
             
                 final_pred = np.argmax(npPred, axis=1)
             
-                predex = np.zeros(self.segSize)
+                predex = np.zeros(self.segSize, dtype=np.int32)
                 bins = int((self.segSize-5)/6)
                 
                 predex[0] = final_pred[0]
@@ -82,14 +83,14 @@ class ProcessVideo():
                 predex[-2] = final_pred[-1]
                 predex[-1] = final_pred[-1]
 
-                framesA = np.arange(t * self.segSize + 1, (t + 1) * self.segSize + 1)
+                framesA = np.arange(t * self.segSize + 1, (t + 1) * self.segSize + 1, dtype=np.int32)
                 padRes = np.stack((framesA, predex), axis=-1)
                 predFrame = DataFrame(padRes)
-                #            predFrame = DataFrame(final_pred)
-                predFrame.to_csv(self.outputFile, sep=';', header=False, index=False, mode='a', dtype=int)
+
+                predFrame.to_csv(self.outputFile, sep=';', header=False, index=False, mode='a')
 
                 # self.model.zero_grad(set_to_none=True)
-                yield int(t * self.segSize * 100/ reader.totalFrames)
+                yield int((t * self.segSize * 100 + 1)/ reader.totalFrames)
             
                 t = t + 1
                 

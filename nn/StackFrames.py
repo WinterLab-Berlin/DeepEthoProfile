@@ -44,10 +44,13 @@ def getTensors(x, ann=None, modify=False): #pos,
     for i in range(bins):
         ii = i * b + b - 1
     
+        if(random() > 0.8):
+            modify = False
+            
         if(modify):
             crtidx = 0
             sx = randint(0, 10)
-            sy = randint(0 ,20)
+            sy = randint(0, 55)
             flip = False
             tx = True
             ty = True

@@ -125,7 +125,7 @@ def cutFinalTrainingSegment(videoFile, annFile, startIndex, noFrames, outputFold
             # print('cropped files already exist')
             return outVideoFile, outAnnFile #
         else:
-            print('crop file {} from index {}'.format(videoFile, startIndex))
+            # print('crop file {} from index {}'.format(videoFile, startIndex))
             if(cutVideo(videoFile, outVideoFile, startIndex, noFrames) and
                 cutAnnFile(annFile, outAnnFile, startIndex, noFrames)):
                 #     and 
@@ -159,7 +159,7 @@ def cutTrainingSegment(videoFile, posFile, annFile, startIndex, noFrames):
 def cutOiginalTrainingSegment(videoFile, annFile, startIndex, noFrames):
     if(path.exists(videoFile) and path.exists(annFile)):
         outExt = '_s{}_n{}'.format(startIndex, noFrames)
-        outVideoFile = videoFile.replace('.mkv', outExt + '.avi')
+        outVideoFile = videoFile.replace('.avi', outExt + '.avi')
         # outPosFile = posFile.replace('.csv', outExt + '.csv')
         outAnnFile = annFile.replace('.csv', outExt + '.csv')
         
@@ -168,7 +168,28 @@ def cutOiginalTrainingSegment(videoFile, annFile, startIndex, noFrames):
             return outVideoFile, outAnnFile #outPosFile, 
         else:
             print('crop file: ', videoFile)
-            if(cutVideo(videoFile, outVideoFile, startIndex, noFrames, True) and
+            if(cutVideo(videoFile, outVideoFile, startIndex, noFrames, False) and
+                cutAnnFile(annFile, outAnnFile, startIndex, noFrames)):
+                # and 
+                # cutPosFile(posFile, outPosFile, startIndex, noFrames)):
+                
+                return outVideoFile, outAnnFile #outPosFile, 
+            
+    return None, None
+
+def cutOiginalTrainingSegment_Crop(videoFile, annFile, startIndex, noFrames):
+    if(path.exists(videoFile) and path.exists(annFile)):
+        outExt = '_s{}_n{}'.format(startIndex, noFrames)
+        outVideoFile = videoFile.replace('.avi', outExt + '.avi')
+        # outPosFile = posFile.replace('.csv', outExt + '.csv')
+        outAnnFile = annFile.replace('.csv', outExt + '.csv')
+        
+        if(path.exists(outVideoFile) and path.exists(outAnnFile)): #and path.exists(outPosFile) 
+            # print('cropped files already exist')
+            return outVideoFile, outAnnFile #outPosFile, 
+        else:
+            print('crop file: ', videoFile)
+            if(cutVideo(videoFile, outVideoFile, startIndex, noFrames, False) and
                 cutAnnFile(annFile, outAnnFile, startIndex, noFrames)):
                 # and 
                 # cutPosFile(posFile, outPosFile, startIndex, noFrames)):

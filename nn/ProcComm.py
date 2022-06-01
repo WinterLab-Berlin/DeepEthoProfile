@@ -63,7 +63,8 @@ class ProcComm:
             
     
             pCmd = ['ffmpeg', '-y', '-i', videoFilePath, 
-                    '-vf', 'crop=iw:500:0:50,pad=width=704:height=704:x=0:y=100:color=black,scale=256:256', 
+                    # '-vf', 'crop=iw:500:0:50,pad=width=704:height=704:x=0:y=100:color=black,scale=256:256', 
+                    '-vf', 'crop=iw:350:0:90,pad=width=704:height=704:x=0:y=180:color=black,scale=256:256',
                     '-c:v', 'libx264', inputVideo]
 # '-vf', 'crop=iw:500:0:50,pad=width=724:height=724:x=10:y=100:color=black,scale=256:256', 
             r = subprocess.run(pCmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -110,12 +111,15 @@ class ProcComm:
     def callProc(self, videoFile, outputFile, logger):
         progress = 0
         
+        logger.log('process video {} with output {}'.format(videoFile, outputFile))
         proc = ProcessVideo('./mouse_v2.model', 10, videoFile, outputFile)
         
         try:
             crtStep = 0
             for x in proc.process(logger):
                 crtStep = crtStep + 1
+                # logger.log('processing step')
+
                 if(crtStep % 10 == 0):
                     mess = 'processing percent: {}'.format(x)
                     self.sendMessage(mess)

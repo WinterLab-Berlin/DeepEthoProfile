@@ -45,8 +45,8 @@ class TestModel:
 
             if(ti%10==1):
                 print('cummulated test result at step {} is {} '.format(ti, ta/ti))
-                with np.printoptions(suppress=True):
-                    print('confusion: \n', confusion)
+                # with np.printoptions(suppress=True):
+                #     print('confusion: \n', confusion)
         print('final test result = ', ta/ti)
         with np.printoptions(suppress=True):
             print('confusion: \n', confusion)

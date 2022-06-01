@@ -22,7 +22,7 @@ from TrainInterval import TrainInterval
 # from TestInterval import TestInterval
 from Logger import Logger
 from VideoHelper import cutTrainingSegment
-from SelectTrainingData import selectTrainIntervals, getOriginalFiles_PCRS, cutOiginalTrainingSegment
+from SelectTrainingData import getOriginalFiles_PCRS, cutOiginalTrainingSegment #selectTrainIntervals, 
 from TestModel import TestModel
 
 noClasses = 10
@@ -176,9 +176,9 @@ if __name__ == "__main__":
         exit(1)
 
 
-    modelPath = './mouse.modular.model'
+    # modelPath = './mouse.modular.model'
     
-    epochs = 3
+    epochs = 15
     
     #train
     trainModel = TrainModel(noClasses)
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 
 
     trainModel.train(epochs)
-    trainModel.saveModel(modelPath)
+    #trainModel.saveModel(modelPath)
     trainModel.cleanup()
     del trainModel
     

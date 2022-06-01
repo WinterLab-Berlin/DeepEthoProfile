@@ -35,7 +35,7 @@ class TrainInterval():
         loss = 0
         avg_cost = 0
 
-        startIndex = randint(0,15)
+        startIndex = randint(0,11)
         # stopIndex = -1
         
         # if max(prevAnn) > balanceThresh * 10:

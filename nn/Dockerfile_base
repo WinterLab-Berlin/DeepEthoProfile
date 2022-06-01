@@ -15,7 +15,8 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -U numpy matplotlib pandas scikit-image scikit-learn scipy opencv-python
 #RUN pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 #RUN pip3 install torch==1.7.1+cu101 torchvision==0.8.2+cu101 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
-RUN pip3 install torch torchvision
+#RUN pip3 install torch torchvision
+RUN pip3 install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu113
 
 RUN mkdir /home/nn 
 WORKDIR /home/nn
