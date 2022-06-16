@@ -8,4 +8,4 @@ else
 fi
 
 #create processing docker image
-docker build --tag ethoprofiler_nn -f ./nn/Dockerfile ./nn
+docker build --tag ethoprofiler_nn_v3 -f ./nn/Dockerfile ./nn
