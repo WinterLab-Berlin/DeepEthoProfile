@@ -1,3 +1,10 @@
+"""
+Basic interface between the UI and the processing module
+
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+"""
+
+
 import socket
 from sys import argv
 from os import path
@@ -37,40 +44,28 @@ class ProcComm:
 
         if(fileName is not None):
             mountDir='/mnt/data'
-            localDir = '/home/nn'
-            videoFilePath = path.join(mountDir, fileName)
-            inputVideo = ''
+            # localDir = '/home/nn'
+            # videoFilePath = path.join(mountDir, fileName)
+            # inputVideo = ''
+            inputVideo = path.join(mountDir, fileName)
+            logPath = ''
+            outputFile = ''
 
             if(fileName.endswith('mkv')):
-                inputVideo = fileName.replace('.mkv', '.avi')
-                logPath = videoFilePath.replace('.mkv', '_nn.log')
-                outputFile = videoFilePath.replace('.mkv', '_results_v2.csv')
+                # inputVideo = fileName #.replace('.mkv', '.avi')
+                logPath = inputVideo.replace('.mkv', '_nn.log')
+                outputFile = inputVideo.replace('.mkv', '_results_v3.csv')
             elif(fileName.endswith('avi')):
-                inputVideo = fileName#.replace('.avi', '_c.avi')
-                logPath = videoFilePath.replace('.avi', '_nn.log')
-                outputFile = videoFilePath.replace('.avi', '_results_v2.csv')
-            
-            if not inputVideo:
+                # inputVideo = fileName#.replace('.avi', '_c.avi')
+                logPath = inputVideo.replace('.avi', '_nn.log')
+                outputFile = inputVideo.replace('.avi', '_results_v3.csv')
+            else:
                 self.sendMessage('invalid video file {}'.format(fileName))
                 serverSocket.close()
                 return
 
             
             logger = Logger(logPath)
-            inputVideo = path.join(localDir, inputVideo)
-
-            logger.log('convert file {} to {}'.format(videoFilePath, inputVideo))
-            
-    
-            pCmd = ['ffmpeg', '-y', '-i', videoFilePath, 
-                    # '-vf', 'crop=iw:500:0:50,pad=width=704:height=704:x=0:y=100:color=black,scale=256:256', 
-                    '-vf', 'crop=iw:350:0:90,pad=width=704:height=704:x=0:y=180:color=black,scale=256:256',
-                    '-c:v', 'libx264', inputVideo]
-# '-vf', 'crop=iw:500:0:50,pad=width=724:height=724:x=10:y=100:color=black,scale=256:256', 
-            r = subprocess.run(pCmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            
-            logger.log('converted to {} with ffmpeg return={}'.format(inputVideo, r))
-            
 
             self.sendMessage('processing file {}'.format(inputVideo))
             self.callProc(inputVideo, outputFile, logger)
@@ -111,7 +106,7 @@ class ProcComm:
     def callProc(self, videoFile, outputFile, logger):
         progress = 0
         
-        logger.log('process video {} with output {}'.format(videoFile, outputFile))
+        logger.log('process video {} with output {} \n'.format(videoFile, outputFile))
         proc = ProcessVideo('./mouse_v2.model', 10, videoFile, outputFile)
         
         try:
@@ -120,13 +115,13 @@ class ProcComm:
                 crtStep = crtStep + 1
                 # logger.log('processing step')
 
-                if(crtStep % 10 == 0):
-                    mess = 'processing percent: {}'.format(x)
+                if(crtStep % 20 == 0):
+                    mess = 'processing percent: {} \n'.format(x)
                     self.sendMessage(mess)
-                    logger.log(mess + '\n')
+                    # logger.log(mess)
                     
         except StopIteration:
-            logger.log('finished at step {}'.format(crtStep))
+            logger.log('finished at step {} \n'.format(crtStep))
             pass
 
 

@@ -3,7 +3,7 @@
 """
 Created on Tue Jan 11 17:18:13 2022
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 import numpy as np
@@ -35,7 +35,7 @@ class ProcessVideo():
         reader = DataReader(self.videoFile)
         if(reader.openVideo() is False):
             print('cannot open video ', self.videoFile)
-            logger.log('cannot open video {} '.format(self.videoFile))
+            logger.log('cannot open video {} \n'.format(self.videoFile))
             return -1
 
         t = 0        

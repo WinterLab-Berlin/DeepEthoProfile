@@ -3,7 +3,7 @@
 """
 Created on Thu Jul 16 16:10:03 2020
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 #read video
@@ -41,6 +41,7 @@ class DataReader():
         self.yDeq = deque('', 10)
         
         self.totalFrames = 0
+        
         
     # def loadData(self):
         #self.cageData = pd.read_csv(self.annFile, sep=';', header=0, nrows=1)
@@ -84,7 +85,13 @@ class DataReader():
             
             if ret == True:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                # frame = cv2.resize(frame, (256, 256), interpolation = cv2.INTER_AREA)
+                h, w = frame.shape
+                if (h != 256 or w != 256):
+                    #crop, pad and resize
+                    frame = frame[90:440, :]
+                    frame = cv2.copyMakeBorder(frame, 177, 177, 0, 0, cv2.BORDER_CONSTANT, None, 0)
+                    frame = cv2.resize(frame, (256, 256)) #, cv2.INTER_AREA)
+                    
                 self.crtFrameIndex = self.crtFrameIndex + 1
                 return frame #/ 255 # - 1
             else:
@@ -141,7 +148,7 @@ class DataReader():
             return -1
         
     
-    def getProcessingData(self, index, noFrames, splitSize=0.5):
+    def getProcessingData(self, index, noFrames):
         #TODO: check whether there are enough frames
         frameSet = self.readProcData(index, noFrames) #, posFeatures
         
