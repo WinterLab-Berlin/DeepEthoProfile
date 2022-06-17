@@ -44,7 +44,7 @@ namespace VideoAnnotationViewer
 
         public MainWindow()
         {
-            Unosquare.FFME.MediaElement.FFmpegDirectory = @".";
+            Unosquare.FFME.MediaElement.FFmpegDirectory = @"..\\..\\ffmpeg";
             InitializeComponent();
 
             videoControl.LoadedBehavior = MediaState.Pause;
