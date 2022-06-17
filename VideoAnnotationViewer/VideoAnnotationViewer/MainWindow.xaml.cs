@@ -291,7 +291,7 @@ namespace VideoAnnotationViewer
                 _crtManualAnnotation = int.Parse(checkedAnnotation);
                 
                 //switch (checkedAnnotation)
-                Console.WriteLine("radion button checked: " + checkedAnnotation);
+                //Console.WriteLine("radion button checked: " + checkedAnnotation);
 
                 if (_annotationMode == AnnotationMode.Manual)
                     markAnnotation(_crtFrameIndex);
@@ -400,7 +400,7 @@ namespace VideoAnnotationViewer
             videoControl.Position = crtPos.Add(ts);
             _crtFrameIndex = Convert.ToInt64(videoControl.Position.TotalSeconds * videoControl.VideoFrameRate);
 
-            Console.WriteLine("new frame is: " + _crtFrameIndex + ", new position is: " + videoControl.Position.TotalSeconds);
+            //Console.WriteLine("new frame is: " + _crtFrameIndex + ", new position is: " + videoControl.Position.TotalSeconds);
         }
 
         private async void goToFrame(long frame)
@@ -412,7 +412,7 @@ namespace VideoAnnotationViewer
             _crtFrameIndex = frame;
             videoControl.Position = ts;
 
-            Console.WriteLine("new frame is: " + _crtFrameIndex + ", new position is: " + videoControl.Position.TotalSeconds);
+            //Console.WriteLine("new frame is: " + _crtFrameIndex + ", new position is: " + videoControl.Position.TotalSeconds);
         }
 
         private void markAnnotation(long frame)
@@ -487,7 +487,7 @@ namespace VideoAnnotationViewer
         private async Task jumpToSecond(long second)
         {
             Task tt = videoControl.Pause();
-            Console.WriteLine("should pause now");
+            //Console.WriteLine("should pause now");
             playVideoButton.Content = playButtonText;
             await tt;
 
