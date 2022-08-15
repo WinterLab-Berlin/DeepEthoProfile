@@ -76,7 +76,7 @@ class CentralCommand:
         print('start processing NN docker image on port: ', crtPort)
 
         client = docker.from_env()
-        client.containers.run("ethoprofiler_nn_v3", detach=True, ports={2000: crtPort}, remove=True,
+        client.containers.run("ethoprofiler_nn_av", detach=True, ports={2000: crtPort}, remove=True,
                               device_requests=[docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])],        #runtime="nvidia",
                               volumes={taskDir: {'bind': '/mnt/data', 'mode': 'rw'}})
 

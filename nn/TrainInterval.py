@@ -11,12 +11,13 @@ import torch
 
 from random import randint
 
-from DataReader import DataReader
+# from DataReader import DataReader
+from DataReaderAV import DataReaderAV
 from sklearn.metrics import accuracy_score
 from StackFrames import getTensors
 
 class TrainInterval():
-    def __init__(self, model, optimizer, criterion, videoFile, annFile, noClasses): #posFile, 
+    def __init__(self, model, optimizer, criterion, videoFile, annFile, noClasses, logger): #posFile, 
         self.videoFile = videoFile
         self.annFile = annFile
         # self.posFile = posFile
@@ -26,27 +27,25 @@ class TrainInterval():
         self.criterion = criterion
         self.noClasses = noClasses
         
-        self.segSize = 41
+        self.segSize = 45
+        self.logger = logger
         
     
-    def train(self, prevAnn = [], balanceThresh = 1000):
+    def train(self):
         # print('train video: {}, {}, {}'.format(self.videoFile, self.posFile, self.annFile))
         
         loss = 0
         avg_cost = 0
 
-        startIndex = randint(0,11)
+        startIndex = randint(0, 6)
         # stopIndex = -1
-        
-        # if max(prevAnn) > balanceThresh * 10:
-        #     startIndex, stopIndex = self.balanceAnn(prevAnn, balanceThresh)
         
         if(startIndex < 0):
             print('skipping this video now: ', self.videoFile)
             return -1, np.zeros(self.noClasses)
         
-        reader = DataReader(self.videoFile, self.annFile) #self.posFile, 
-        if(reader.openVideo() is False):
+        reader = DataReaderAV(self.logger, self.videoFile, self.annFile) #self.posFile, 
+        if(reader.open(offset=startIndex) is False):
             print('cannot open video ', self.videoFile)
             return -1, np.zeros(self.noClasses)
         
@@ -64,12 +63,17 @@ class TrainInterval():
             #     break
             
             # x, pos, y = reader.getTrainingData(startIndex + t * self.segSize + 1, self.segSize)
-            x, y = reader.getTrainingData(startIndex + t * self.segSize + 1, self.segSize)
-            if x is -1:
+            dataSegment = reader.readFrames(self.segSize)
+            if(len(dataSegment) < 13): #self.segSize):
                 break
-            
+
+            # if(len(dataSegment) < self.segSize):
+            #     print('len = ', len(dataSegment))
+            data = np.array(dataSegment, dtype=object)
             # xt, posT, yt = self.model.getTensors(x, pos, y)
             # xt, yt = self.model.getTensors(x, y, modify=True)
+            x = data[:, 2]
+            y = data[:, 3]
             xt, yt = getTensors(x, y, modify=True)
             
             # model.zero_grad()

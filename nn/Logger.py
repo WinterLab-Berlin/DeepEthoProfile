@@ -28,6 +28,7 @@ class Logger:
     def log(self, message, printMess=False):
         self.logFile.write(datetime.now().strftime("%y%m%d_%H%M%S"))
         self.logFile.write(' - ' + message)
+        self.logFile.write('\n')
 
         if printMess:
             print(message)

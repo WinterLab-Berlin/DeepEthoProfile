@@ -54,11 +54,11 @@ class ProcComm:
             if(fileName.endswith('mkv')):
                 # inputVideo = fileName #.replace('.mkv', '.avi')
                 logPath = inputVideo.replace('.mkv', '_nn.log')
-                outputFile = inputVideo.replace('.mkv', '_results_v3.csv')
+                outputFile = inputVideo.replace('.mkv', '_results_v4.csv')
             elif(fileName.endswith('avi')):
                 # inputVideo = fileName#.replace('.avi', '_c.avi')
                 logPath = inputVideo.replace('.avi', '_nn.log')
-                outputFile = inputVideo.replace('.avi', '_results_v3.csv')
+                outputFile = inputVideo.replace('.avi', '_results_v4.csv')
             else:
                 self.sendMessage('invalid video file {}'.format(fileName))
                 serverSocket.close()

@@ -1,21 +1,19 @@
-FROM nvidia/cuda:11.4.2-runtime-ubuntu20.04 
+FROM nvidia/cuda:11.4.3-cudnn8-runtime-ubuntu20.04
 #nvidia/cuda:10.2-cudnn8-devel
 
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64
 #ENV DEBIAN_FRONTEND noninteractive
 
 #Update packages and install basics
 RUN apt-get -y -qq update && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq wget unzip git dialog apt-utils nano ffmpeg x264
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3.6 python3-opencv python3-pip
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3.8 python3-pip python3-opencv 
 
 RUN  apt-get clean && rm -rf /var/lib/apt
 
 RUN pip3 install --upgrade pip
-RUN pip3 install -U numpy matplotlib pandas scikit-image scikit-learn scipy opencv-python
-#RUN pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio===0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
-#RUN pip3 install torch==1.7.1+cu101 torchvision==0.8.2+cu101 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
-#RUN pip3 install torch torchvision
+RUN pip3 install -U numpy matplotlib pandas scikit-image scikit-learn scipy av opencv-python
 RUN pip3 install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu113
 
 RUN mkdir /home/nn 

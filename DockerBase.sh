@@ -1,1 +1,1 @@
-docker build --tag ethoprofiler_nn_base -f ./nn/Dockerfile_base ./nn
+docker build --tag ethoprofiler_nn_base_av -f ./nn/Dockerfile_base ./nn

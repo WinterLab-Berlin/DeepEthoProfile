@@ -1,7 +1,7 @@
-FROM ethoprofiler_nn_base
+FROM ethoprofiler_nn_base_av
 
 #copy code
-ADD DataReader.py /home/nn
+ADD DataReaderAV.py /home/nn
 ADD EthoCNN.py /home/nn
 ADD mouse_v2.model /home/nn
 ADD ProcComm.py /home/nn

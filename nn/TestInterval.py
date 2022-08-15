@@ -10,8 +10,9 @@ from EthoCNN import EthoCNN#, getTensors
 import torch
 from sklearn.metrics import accuracy_score
 
-from DataReader import DataReader
-from StackFrames import getTensors
+# from DataReader import DataReader
+from DataReaderAV import DataReaderAV
+from StackFrames import getTensors, getTestTensors
 
 
 def setBNTrain(m):
@@ -24,7 +25,7 @@ def setDropEval(m):
 
 
 class TestInterval():
-    def __init__(self, path, noClasses, videoFile, annFile): #posFile, 
+    def __init__(self, path, noClasses, videoFile, annFile, logger): #posFile, 
         self.videoFile = videoFile
         self.annFile = annFile
         # self.posFile = posFile
@@ -35,6 +36,8 @@ class TestInterval():
         
         self.noClasses = noClasses
         self.path = path
+        
+        self.logger = logger
             
         
     def test(self):
@@ -55,8 +58,8 @@ class TestInterval():
     
     #TODO: reset dinamic values
     
-        reader = DataReader(self.videoFile, self.annFile) #self.posFile, 
-        if(reader.openVideo() is False):
+        reader = DataReaderAV(self.logger, self.videoFile, self.annFile) 
+        if(reader.open() is False):
             print('cannot open video ', self.videoFile)
             return -1
         confusion = np.zeros((self.noClasses, self.noClasses))
@@ -65,11 +68,18 @@ class TestInterval():
         with torch.no_grad():
             while(True):
                 # model.zero_grad()
-                x, y = reader.getTrainingData(t * self.segSize + 1, self.segSize)
-                if x is -1:
+                dataSegment = reader.readFrames(self.segSize)
+                if(len(dataSegment) == 0):
                     break
                 
-                xt, yt = getTensors(x, y)
+                data = np.array(dataSegment, dtype=object)
+                x = data[:, 2]
+                y = data[:, 3].tolist()
+
+                # x = data[:][2]
+                # y = data[:][3]
+                
+                xt = getTestTensors(x)
 
             # Forward pass: Compute predicted y by passing x to the model
                 crt_y = self.model(xt)

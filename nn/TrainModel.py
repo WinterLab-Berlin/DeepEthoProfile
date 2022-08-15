@@ -28,7 +28,7 @@ from TestModel import TestModel
 noClasses = 10
 
 class TrainModel():
-    def __init__(self, noClasses):
+    def __init__(self, noClasses, log):
         print('init TrainModel')
         #TODO: init model 
         self.model = None
@@ -42,6 +42,8 @@ class TrainModel():
         
         self.stag = 0
         self.trainRemoveThresh = 0.001
+        
+        self.logger = log
         
     def initModel(self):
         self.model = EthoCNN(self.noClasses)
@@ -66,7 +68,7 @@ class TrainModel():
         torch.cuda.empty_cache()
 
     def addTrainInterval(self, videoFile, annFile): 
-        newTrainInterval = TrainInterval(self.model, self.optimizer, self.criterion, videoFile, annFile, self.noClasses) 
+        newTrainInterval = TrainInterval(self.model, self.optimizer, self.criterion, videoFile, annFile, self.noClasses, logger=self.logger) 
         self.trainIntervals.append(newTrainInterval)
         
         
@@ -85,7 +87,7 @@ class TrainModel():
         for i in self.trainIntervals:
 
             if(self.running):
-                cost, annSet, acc, cc = i.train(annTotalSet)
+                cost, annSet, acc, cc = i.train()
 
                 tc = tc + cost
                 ti = ti + 1
@@ -113,6 +115,9 @@ class TrainModel():
         # stag = 0
         minCost = -1
         self.stag = 0
+        
+        # shuffle(self.trainIntervals)
+        
         for i in range(steps):
             print('train step ', i)
             if(self.running):
@@ -165,23 +170,25 @@ class TrainModel():
 if __name__ == "__main__":
     import sys
     
-    trainVideoPath = '' #/home/andrei/Videos/train_orig/'
+    trainVideoPath = '/home/andrei/Videos/2205_trainCropVideos_21/'
+    # trainVideoPath = ''
     
-    if (len(sys.argv) > 1):
-        # global trainVideoPath
-        print('training folder: ', sys.argv[1])
-        trainVideoPath = sys.argv[1]
-    else:
-        print ('not enough parameters')
-        exit(1)
-
+    # if (len(sys.argv) > 1):
+    #     # global trainVideoPath
+    #     print('training folder: ', sys.argv[1])
+    #     trainVideoPath = sys.argv[1]
+    # else:
+    #     print ('not enough parameters')
+    #     exit(1)
+    
+    log = Logger('train.log')
 
     # modelPath = './mouse.modular.model'
     
-    epochs = 15
+    epochs = 13
     
     #train
-    trainModel = TrainModel(noClasses)
+    trainModel = TrainModel(noClasses, log)
     
     for videoFile in glob.glob(trainVideoPath + '*.avi'):
         annFile = videoFile.replace('.avi', '_ann.csv')
@@ -200,6 +207,8 @@ if __name__ == "__main__":
     #test    
     dataFolder = ''#'/home/andrei/Videos/orig_work'
     annFolder = ''#'/home/andrei/Videos/orig_work/ann_train'
+    # dataFolder = '/home/andrei/Videos/orig_work'
+    # annFolder = '/home/andrei/Videos/orig_work/ann_train'
     
     if(len(sys.argv) > 2):
         dataFolder = sys.argv[2]
@@ -216,10 +225,10 @@ if __name__ == "__main__":
         
         inputFiles = getOriginalFiles_PCRS(dataFolder, annFolder)
         
-        for x in range(2, epochs):#epochs-10):
+        for x in range(4, epochs):#epochs-10):
             modelName = 'step_{}.model'.format(x)#epochs - x)
             print(' - - - testing model: {} - - - '.format( modelName))
-            testModel = TestModel(noClasses, modelName)
+            testModel = TestModel(noClasses, modelName, log)
             
             for x in inputFiles:
                 for crtInt in intervals_PCRS:

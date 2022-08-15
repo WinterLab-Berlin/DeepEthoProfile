@@ -11,8 +11,9 @@ from EthoCNN import EthoCNN
 import torch
 from pandas import DataFrame
 
-from DataReader import DataReader
-from StackFrames import getTensors
+# from DataReader import DataReader
+from DataReaderAV import DataReaderAV
+from StackFrames import getTestTensors
 
 class ProcessVideo():
     def __init__(self, modelPath, noClasses, videoFile, outputFile, segSize=125): 
@@ -31,9 +32,11 @@ class ProcessVideo():
            self.model.to(torch.device('cuda'))
                 
         self.model.eval()
-
-        reader = DataReader(self.videoFile)
-        if(reader.openVideo() is False):
+        
+        logger.log('open video {}'.format(self.videoFile))
+        
+        reader = DataReaderAV(logger, self.videoFile)
+        if(reader.open() is False):
             print('cannot open video ', self.videoFile)
             logger.log('cannot open video {} \n'.format(self.videoFile))
             return -1
@@ -44,19 +47,26 @@ class ProcessVideo():
         
         #write header
         resultsFile = open(self.outputFile, 'w')
-        resultsFile.write('0:none; 1:drink; 2:eat; 3:groom back; 4:groom; 5:hang; 6:micromovement; 7:rear; 8:rest; 9:walk; \n')
-        resultsFile.write('nnVersion:2\n')
+        resultsFile.write('0:none; 1:drink; 2:eat; 3:groom back; 4:groom; 5:hang; 6:micromovement; 7:rear; 8:rest; 9:walk; v3\n')
+        resultsFile.write('frame;annotation;time\n')
         resultsFile.close()
         
 
         with torch.no_grad():
             while(True):
                 # model.zero_grad()
-                x = reader.getProcessingData(t * self.segSize + 1, self.segSize)
-                if x is -1:
+                # logger.log('read frames')
+                dataSegment = reader.readFrames(self.segSize)
+                
+                if(len(dataSegment) == 0):
                     break
+                
+                data = np.array(dataSegment, dtype=object)
+                x = data[:, 2]
+                frameIdx = data[:, 0]
+                framePts = data[:, 1]
 
-                xt,_ = getTensors(x)
+                xt = getTestTensors(x)
 
             # Forward pass: Compute predicted y by passing x to the model
                 crt_y = self.model(xt)
@@ -83,14 +93,17 @@ class ProcessVideo():
                 predex[-2] = final_pred[-1]
                 predex[-1] = final_pred[-1]
 
-                framesA = np.arange(t * self.segSize + 1, (t + 1) * self.segSize + 1, dtype=np.int32)
-                padRes = np.stack((framesA, predex), axis=-1)
+                # framesA = np.arange(t * self.segSize + 1, (t + 1) * self.segSize + 1, dtype=np.int32)
+                padRes = np.stack((frameIdx, predex, framePts), axis=-1)
                 predFrame = DataFrame(padRes)
 
+                # logger.log('save results')
                 predFrame.to_csv(self.outputFile, sep=';', header=False, index=False, mode='a')
 
+                perc = int((t * self.segSize * 100 + 1)/ reader.totalFrames)
+                # logger.log('yield {}'.format(perc))
                 # self.model.zero_grad(set_to_none=True)
-                yield int((t * self.segSize * 100 + 1)/ reader.totalFrames)
+                yield perc
             
                 t = t + 1
                 

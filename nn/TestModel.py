@@ -13,7 +13,7 @@ import numpy as np
 
 
 class TestModel:
-    def __init__(self, noClasses, path):
+    def __init__(self, noClasses, path, logger):
         with torch.no_grad():
             self.model = None
             self.testIntervals = []
@@ -23,9 +23,11 @@ class TestModel:
             
             self.path = path
             self.noClasses = noClasses
+            
+            self.logger = logger
                           
     def addTestInterval(self, videoFile, annFile): #posFile, 
-        newTrainInterval = TestInterval(self.path, self.noClasses, videoFile, annFile) #posFile, 
+        newTrainInterval = TestInterval(self.path, self.noClasses, videoFile, annFile, self.logger) #posFile, 
         self.testIntervals.append(newTrainInterval)
         
     def test(self):
