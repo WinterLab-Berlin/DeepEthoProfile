@@ -1,0 +1,5 @@
+
+*.cache
+*.baml
+VideoAnnotationViewer/.vs/VideoAnnotationViewer/v14/.suo
+*.lref
