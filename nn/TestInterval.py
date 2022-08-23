@@ -87,8 +87,10 @@ class TestInterval():
             
                 final_pred = np.argmax(npPred, axis=1)
             
-                predex = np.zeros(self.segSize)
-                bins = int((self.segSize-5)/6)
+                predex = np.zeros(len(dataSegment))
+                bins = int((len(dataSegment)-5)/6)
+                
+                # print('bins={}, t={}'.format(bins, t))
                 
                 predex[0] = final_pred[0]
                 predex[1] = final_pred[0]

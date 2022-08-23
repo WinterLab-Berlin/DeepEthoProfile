@@ -74,8 +74,8 @@ class ProcessVideo():
             
                 final_pred = np.argmax(npPred, axis=1)
             
-                predex = np.zeros(self.segSize, dtype=np.int32)
-                bins = int((self.segSize-5)/6)
+                predex = np.zeros(len(dataSegment) , dtype=np.int32)
+                bins = int((len(dataSegment) -5)/6)
                 
                 predex[0] = final_pred[0]
                 predex[1] = final_pred[0]
