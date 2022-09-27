@@ -1,6 +1,11 @@
 
 *.cache
 *.baml
-VideoAnnotationViewer/.vs/VideoAnnotationViewer/v14/.suo
+*.suo
 *.lref
 *.pyc
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+packages/
+.vs/
