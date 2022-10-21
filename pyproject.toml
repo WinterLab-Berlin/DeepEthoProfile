@@ -3,6 +3,6 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "./nn/pheno_ui"
+name = "ui/pheno_ui"
 authors = [{name = "Andrei Istudor", email = "andrei.istudor@hu-berlin.de"}]
 dynamic = ["version", "description"]
