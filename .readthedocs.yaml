@@ -3,8 +3,8 @@ version: 2
 python:
   # Install our python package before building the docs
   install:
-    - method: pip
     - requirements: docs/requirements.txt
+    - method: pip
       path: . 
 build:
   os: "ubuntu-20.04"
