@@ -3,6 +3,7 @@ version: 2
 python:
   # Install our python package before building the docs
   install:
+    - requirements: docs/requirements.txt
     - method: pip
       path: . 
 build:
