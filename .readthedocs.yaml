@@ -6,8 +6,8 @@ build:
   tools:
     python: "3.8"
   apt_packages:
-    python3-pyqt5
-    qt5-qmake
+    - python3-pyqt5
+    - qt5-qmake
 python:
   # Install our python package before building the docs
   install:
