@@ -1,7 +1,5 @@
 API
 ===
 
-.. autosummary::
-   :toctree: generated
-
-   DeepEthoProfile
+.. autoclass:: ./ui/pheno_ui
+   

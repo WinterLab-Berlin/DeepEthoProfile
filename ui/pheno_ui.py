@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-entry point
+pheno_ui - entry point 
 @author: Andrei Istudor
 """
 
@@ -24,6 +22,9 @@ from TaskState import TaskState
 from PhenoPorts import guiPort
 
 class pheno_ui(QtWidgets.QMainWindow):
+"""
+class definition - starts the User Interface
+"""
     def __init__(self, nPreprocTasks = 2, nProcTasks = 1, parent=None):
         super(pheno_ui, self).__init__(parent)
 #        self.newVideosQ = Queue()
