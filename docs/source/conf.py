@@ -1,6 +1,21 @@
 # Configuration file for the Sphinx documentation builder.
 # -- Project information
 
+import os
+import sys
+import time
+from datetime import datetime
+
+from sphinx.application import Sphinx
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+path = os.path.dirname(os.path.abspath(__file__))
+#sys.path.insert(0, os.path.join(path, '..', '..'))
+sys.path.insert(0, os.path.join(path, '../..', 'ui'))
+#import pyqtgraph
+
 project = 'DeepEthoProfile'
 copyright = '2022, WinterLab-Berlin'
 author = 'Andrei Istudor'
@@ -32,3 +47,9 @@ html_theme = 'sphinx_rtd_theme'
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
+
+autoclass_content = 'both'
+
+autodoc_mock_imports = [
+    "PyQt5",
+]
