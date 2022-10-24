@@ -1,6 +1,5 @@
 alabaster==0.7.12
 appdirs==1.4.4
-apt-xapian-index==0.49
 apturl==0.5.2
 argcomplete==1.12.3
 argh==0.26.2
