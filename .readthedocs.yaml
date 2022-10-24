@@ -9,6 +9,7 @@ build:
     - python3-pyqt5
     - qt5-qmake
   commands:
+    - python3 -m pip install --upgrade pip'
     - pip3 install PyQt5
 python:
   # Install our python package before building the docs
