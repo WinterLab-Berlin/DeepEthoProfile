@@ -26,7 +26,14 @@ class pheno_ui(QtWidgets.QMainWindow):
     """
     The pheno_ui loads the graphic definition from MainWindow.ui
     Takes one optional parameter, the number of Docker processing instances - default is 1
+    
+    Parameters:
+    nProcTasks: number of processing tasks that will run in parallel
     """
+    nProcTasks: int
+    taskCounter: int
+    firstTask: bool
+    
     def __init__(self, nProcTasks = 1, parent=None):
         super(pheno_ui, self).__init__(parent)
 #        self.newVideosQ = Queue()
