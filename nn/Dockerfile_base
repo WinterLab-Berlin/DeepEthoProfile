@@ -1,5 +1,6 @@
+# script to builds a base Docker image containing the software environment needed to run the processing
+
 FROM nvidia/cuda:11.4.3-cudnn8-runtime-ubuntu20.04
-#nvidia/cuda:10.2-cudnn8-devel
 
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Sep 15 00:29:08 2021
+Logger class
 
 @author: andrei
 """

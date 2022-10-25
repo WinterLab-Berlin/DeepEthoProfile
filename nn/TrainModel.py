@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov  3 12:54:41 2021
+The TrainModel class 
+Usage
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 import torch
 import torch.nn
@@ -22,7 +23,7 @@ from TrainInterval import TrainInterval
 # from TestInterval import TestInterval
 from Logger import Logger
 from VideoHelper import cutTrainingSegment
-from SelectTrainingData import getOriginalFiles_PCRS, cutOiginalTrainingSegment #selectTrainIntervals, 
+from SelectTrainingData import getOriginalFiles_PCRS, cutOiginalTrainingSegment, getValidationData_RS #selectTrainIntervals, 
 from TestModel import TestModel
 
 noClasses = 10

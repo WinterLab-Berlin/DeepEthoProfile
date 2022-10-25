@@ -1,3 +1,4 @@
+# script to build the Docker image that will run the processing, using the base image created by Dockerfile_base
 FROM ethoprofiler_nn_base_av
 
 #copy code

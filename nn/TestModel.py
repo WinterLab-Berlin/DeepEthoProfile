@@ -3,7 +3,7 @@
 """
 Created on Tue Nov 23 11:26:07 2021
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 # from EthoCNN import EthoCNN
 from TestInterval import TestInterval

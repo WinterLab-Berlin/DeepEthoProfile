@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: Andrei Istudor
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 import os.path
@@ -29,8 +29,8 @@ class CentralCommand:
 
         self.started = True
 
-    def start(self, noPreProcClients = 2, noProcClients = 2):
-        print('nPre = {}, nProc = {}'.format(noPreProcClients, noProcClients))
+    def start(self, noProcClients = 2):
+        print('nProc = {}'.format(noProcClients))
         self.procPortPool = PortPool(noProcClients)
 
         self.guiConnThread = Thread(target=self.startGUIConnection)
@@ -118,7 +118,7 @@ class CentralCommand:
         print('processing docker says: ', confirmMess)
 
         task.setProgress(0)
-        task.setState(TaskState.proc)
+        task.setState(TaskState.processing)
 
         #crtProg = 1
         while True:

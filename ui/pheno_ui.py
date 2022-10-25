@@ -1,6 +1,9 @@
 """
-pheno_ui - entry point 
-@author: Andrei Istudor
+Entry point
+    - creates the UI and its connections
+    - starts the CentralCommand thread that manages the processing instances
+
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 __version__ = 0.1
@@ -19,18 +22,15 @@ from CentralCommand import CentralCommand
 from TaskList import TaskList
 from TaskState import TaskState
 
-from PhenoPorts import guiPort
-
 class pheno_ui(QtWidgets.QMainWindow):
-    '''
-    class definition - starts the User Interface
-    '''
-    def __init__(self, nPreprocTasks = 2, nProcTasks = 1, parent=None):
-        """init method"""
+    """
+    The pheno_ui loads the graphic definition from MainWindow.ui
+    Takes one optional parameter, the number of Docker processing instances - default is 1
+    """
+    def __init__(self, nProcTasks = 1, parent=None):
         super(pheno_ui, self).__init__(parent)
 #        self.newVideosQ = Queue()
         self.taskList = TaskList()
-        self.nPreprocTasks = nPreprocTasks
         self.nProcTasks = nProcTasks
 
         self.startCommServer()
@@ -55,17 +55,8 @@ class pheno_ui(QtWidgets.QMainWindow):
 
         self.tableView = QtWidgets.QTableView()
         self.tableView.setModel(self.tableModel)
-#        self.tableView.setColumnHidden(0, True)
-
- #       self.tableView.setColumnWidth(1, 610)
-  #      self.tableView.setColumnWidth(2, 65)
-   #     self.tableView.setColumnWidth(3, 65)
 
         self.listLayout.addWidget(self.tableView)
-
-    def startCommServer(self):
-        self.cc = CentralCommand(self.taskList)
-        self.cc.start(self.nPreprocTasks, self.nProcTasks)
 
     def addMultipleClicked(self):
         self.addWindow = add_multiple()
@@ -101,21 +92,20 @@ class pheno_ui(QtWidgets.QMainWindow):
         newTask.progressQt.connect(self.updateProgress)
         newTask.stateQt.connect(self.updateState)
 
-        self.tableData.append([self.taskCounter, file, 0, 0])
+        self.tableData.append([self.taskCounter, file, 'queued', 'new'])
         self.tableModel.layoutChanged.emit()
 
         if self.firstTask:
             self.tableView.setColumnWidth(0, 15)
             self.tableView.setColumnWidth(1, 550)
             self.tableView.setColumnWidth(2, 70)
-            self.tableView.setColumnWidth(3, 70)
+            self.tableView.setColumnWidth(3, 90)
             self.firstTask = False
 
 #        lastIndex = len(self.tableData) - 1
 #        print('last added video: ', self.tableData[lastIndex][0])
 
     def updateState(self, id, state):
-#        print('task {} signal state={}'.format(id, state))
         #TODO: check state - finished?
         for crtEntry in self.tableData:
             if(crtEntry[0] == id):
@@ -141,22 +131,27 @@ class pheno_ui(QtWidgets.QMainWindow):
         self.cc.stop()
         print('close call')
 
+    #start running CentralCommand object in the background 
+    def startCommServer(self):
+        self.cc = CentralCommand(self.taskList)
+        self.cc.start(self.nProcTasks)
+    
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
 
-    nPreprocTasks = 2
+    #default using just one Docker instance for processing
     nProcTasks = 1
+    
     #read from values from command line
-
     if len(sys.argv) > 1 and sys.argv[1].isdecimal():
-        nPreprocTasks = int(sys.argv[1])
         if len(sys.argv) > 2 and sys.argv[2].isdecimal():
             nProcTasks = int(sys.argv[2])
 
-    print('no Preproc tasks = {}'.format(nPreprocTasks))
     print('no Processing tasks = {}'.format(nProcTasks))
 
-    w = pheno_ui(nPreprocTasks, nProcTasks)
+    w = pheno_ui(nProcTasks)
     w.show()
 
     #TODO: close thread

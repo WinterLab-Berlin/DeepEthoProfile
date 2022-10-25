@@ -303,7 +303,41 @@ def getTrainigFiles_PCRS(dataFolder, annFolder):
         
     return result
 
+def getValidationData_RS(dataFolder, annFolder):
+    videoFiles = ['01_20180815_0000.mkv', '01_20180815_1200.mkv',
+        '02_20180815_0000.mkv', '02_20180815_1200.mkv',
+        '03_20180815_0000.mkv', '03_20180815_1200.mkv',
+        '04_20180815_0000.mkv', '04_20180815_1200.mkv',
+        '05_20180815_0000.mkv', '05_20180815_1200.mkv',  
+        '06_20180815_0000.mkv', '06_20180815_1200.mkv',
+        '07_20180815_0000.mkv', '07_20180815_1200.mkv',
+        '08_20180815_0000.mkv', '08_20180815_1200.mkv',
+        '09_20180815_0000.mkv', '09_20180815_1200.mkv',
+        '10_20180815_0000.mkv', '10_20180815_1200.mkv']
+    
+    annFiles = ['01_20180815_0000.csv', '01_20180815_1200.csv',
+        '02_20180815_0000.csv', '02_20180815_1200.csv',
+        '03_20180815_0000.csv', '03_20180815_1200.csv',
+        '04_20180815_0000.csv', '04_20180815_1200.csv',
+        '05_20180815_0000.csv', '05_20180815_1200.csv',  
+        '06_20180815_0000.csv', '06_20180815_1200.csv',
+        '07_20180815_0000.csv', '07_20180815_1200.csv',
+        '08_20180815_0000.csv', '08_20180815_1200.csv',
+        '09_20180815_0000.csv', '09_20180815_1200.csv',
+        '10_20180815_0000.csv', '10_20180815_1200.csv']
 
+    result = []
+    
+    for i in range(len(videoFiles)):
+        crtVideoFile = videoFiles[i]
+        crtAnnFile = annFiles[i]
+        
+        annFile = path.join(annFolder, crtAnnFile)
+        videoFile = path.join(dataFolder, crtVideoFile)
+        
+        result.append([videoFile, annFile]) #posFile, 
+        
+    return result
 
 if __name__ == "__main__":
         
@@ -315,6 +349,8 @@ if __name__ == "__main__":
                       [270000, 277500], [315000, 322500], [360000, 367500], [405000, 412500], [450000, 457500], [495000, 502500]]
     # intervals_RS = [[1, 7500], [270000, 277500]]
     noClasses = 10
+    
+    #select training intervals
     inputFiles = getTrainigFiles_PCRS(dataFolder, annFolder)    
     totalAnn = np.zeros(noClasses)
 
@@ -323,7 +359,7 @@ if __name__ == "__main__":
         for crtInt in intervals_PCRS:
             segVideo, segAnn = cutOiginalTrainingSegment_Crop(x[0], x[1], crtInt[0], crtInt[1] - crtInt[0])
             # print('proc video ', segVideo)
-            totalAnn += selTrainInt(segVideo, segAnn, outFolder, minCount=2, save=True)
+            totalAnn += selTrainInt(segVideo, segAnn, outFolder, minCount=2, save=False)
             # with np.printoptions(suppress=True):
             #     print('END ann: ', totalAnn)
             # break

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: Andrei Istudor
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 import os
@@ -26,28 +26,18 @@ class add_task(QtWidgets.QDialog):
 
     def connectSignalsSlots(self):
         self.ui.browseButton.clicked.connect(self.browseButtonClicked)
-        self.ui.addBtn.clicked.connect(self.addButtonClicked)
     
     def browseButtonClicked(self):
-        #print('browse')
         home_dir = str(Path.home())
         bfd = QFileDialog(self, 'Choose recording', home_dir + "/Videos/test/", "Videos(*.mkv)")
 #        bfd.setFileMode(QFileDialog.ExistingFiles)
 
         if bfd.exec():
             filenames = bfd.selectedFiles()
-#            print('selecte file(s): ', filenames)
             if(len(filenames) > 0):
                 self.setVideoFile(filenames[0])
-        #else:
-          #  print('nothing selected')
 
-    def addButtonClicked(self):
-        #print('add')
-        pass
 
-    def setVideoFile(self, filename):
-        self.ui.fileText.setText(filename)
 
         self.player = QtMultimedia.QMediaPlayer(None, QtMultimedia.QMediaPlayer.VideoSurface)
         self.player.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(filename)))

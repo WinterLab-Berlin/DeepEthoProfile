@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 16 16:11:17 2020
+Defines the CNN that performs the classification
 
-@author: Andrei Istudor
+
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 import numpy as np
 import torch

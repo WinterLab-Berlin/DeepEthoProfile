@@ -25,8 +25,8 @@ class TaskTableModel(QAbstractTableModel):
                     return "Status"
                 elif section == 3:
                     return "Progress"
-            else:
-                return "Task " + str(section)
+            # else:
+            #     return "Task " + str(section)
 
     def columnCount(self, parent=None):
         if(len(self.data) > 0):

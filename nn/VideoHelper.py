@@ -3,7 +3,7 @@
 """
 Created on Tue Nov 16 11:54:23 2021
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 import cv2
 from os import path, remove

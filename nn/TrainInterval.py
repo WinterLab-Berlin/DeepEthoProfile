@@ -3,7 +3,7 @@
 """
 Created on Wed Nov  3 12:48:13 2021
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 import numpy as np
 import pandas as pd
