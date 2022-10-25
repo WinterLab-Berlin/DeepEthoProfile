@@ -48,7 +48,7 @@ html_theme = 'sphinx_rtd_theme'
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
 
-autoclass_content = 'both'
+#autoclass_content = 'both'
 
 autodoc_mock_imports = [
     "PyQt5",

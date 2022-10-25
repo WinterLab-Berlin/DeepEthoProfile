@@ -3,6 +3,6 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "ui/pheno_ui"
+name = "DeepEthoProfile"
 authors = [{name = "Andrei Istudor", email = "andrei.istudor@hu-berlin.de"}]
-dynamic = ["version", "description"]
+dynamic = ["name", "version", "description"]
