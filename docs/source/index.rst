@@ -6,7 +6,7 @@ DeepEthoProfile Documentation
 TODO: add more details here
 
 Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+how to :doc:`install` the project.
 
 .. note::
 
@@ -17,6 +17,9 @@ Contents
 --------
 
 .. toctree::
-
+   :maxdepth: 2
+   
+   install
    usage
-   api
+   ui
+   nn

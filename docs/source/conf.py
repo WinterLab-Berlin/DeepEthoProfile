@@ -12,9 +12,8 @@ from sphinx.application import Sphinx
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 path = os.path.dirname(os.path.abspath(__file__))
-#sys.path.insert(0, os.path.join(path, '..', '..'))
 sys.path.insert(0, os.path.join(path, '../..', 'ui'))
-#import pyqtgraph
+sys.path.insert(0, os.path.join(path, '../..', 'nn'))
 
 project = 'DeepEthoProfile'
 copyright = '2022, WinterLab-Berlin'
