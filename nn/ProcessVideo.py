@@ -11,7 +11,6 @@ from EthoCNN import EthoCNN
 import torch
 from pandas import DataFrame
 
-# from DataReader import DataReader
 from DataReaderAV import DataReaderAV
 from StackFrames import getTestTensors
 

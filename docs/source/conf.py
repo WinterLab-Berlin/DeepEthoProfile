@@ -54,5 +54,6 @@ autodoc_class_signature = 'separated'
 autodoc_mock_imports = [
     'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtWidgets.QMainWindow',
     'torch', 'torch.nn', 'torch.nn.functional',
-    'scipy', 'torch.optim', 'random'
+    'scipy', 'torch.optim', 'random', 
+    'pandas'
     ]
