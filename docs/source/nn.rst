@@ -1,10 +1,8 @@
-CNN
-===
+NN
+==
 
 Definition
 ----------
-
-.. automodule:: EthoCNN
 
 .. autoclass:: EthoCNN.EthoCNN
       :members:
@@ -13,8 +11,6 @@ Definition
 SW Integration
 --------------
 
-.. automodule:: ProcComm
-
 .. autoclass:: ProcComm.ProcComm
       :members:
       :undoc-members:
@@ -22,8 +18,6 @@ SW Integration
 
 Training and Testing
 --------------------
-
-.. automodule:: TrainModel
 
 .. autoclass:: TrainModel.TrainModel
       :members:
