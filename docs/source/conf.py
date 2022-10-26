@@ -52,5 +52,6 @@ autodoc_class_signature = 'separated'
 #autodoc_typehints = "description"
 
 autodoc_mock_imports = [
-    'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtWidgets.QMainWindow'
+    'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtWidgets.QMainWindow',
+    'torch'
     ]
