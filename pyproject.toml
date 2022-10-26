@@ -5,4 +5,4 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "DeepEthoProfile"
 authors = [{name = "Andrei Istudor", email = "andrei.istudor@hu-berlin.de"}]
-dynamic = ["name", "version", "description"]
+dynamic = ["name", "version", "authors"]
