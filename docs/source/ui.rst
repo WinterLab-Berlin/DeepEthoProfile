@@ -9,7 +9,6 @@ UI
 
 .. autoclass:: pheno_ui.pheno_ui
       :members:
-      :undoc-members:
 .. autoclass:: CentralCommand.CentralCommand
       :members:
       :undoc-members:

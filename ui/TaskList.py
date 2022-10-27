@@ -28,17 +28,6 @@ class TaskList:
                 return True
         return False
 
-    def getBgDoneTask(self):
-        with self.listLock:
-            for i in range(len(self.tasksList)):
-                crtTask = self.tasksList[i]
-                if crtTask.state is TaskState.bgDone:
-                    crtTask.state = TaskState.selected
-                    return crtTask
-
-        #print('no task with bg computed found')
-        return None
-
     def getNewTask(self):
         with self.listLock:
             for i in range(len(self.tasksList)):
@@ -50,15 +39,5 @@ class TaskList:
         #print('no waiting task found')
         return None
 
-    def getTrackDoneTask(self):
-        with self.listLock:
-            for i in range(len(self.tasksList)):
-                crtTask = self.tasksList[i]
-                if crtTask.state is TaskState.trackDone:
-                    crtTask.state = TaskState.selected
-                    return crtTask
-
-        #print('no task with tracking done found')
-        return None
 
 

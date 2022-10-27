@@ -47,8 +47,8 @@ html_theme = 'sphinx_rtd_theme'
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
 
-autoclass_content = 'both'
-autodoc_class_signature = 'separated'
+#autoclass_content = 'both'
+autodoc_class_signature = 'mixed'
 #autodoc_typehints = "description"
 
 autodoc_mock_imports = [
@@ -57,5 +57,6 @@ autodoc_mock_imports = [
     'scipy', 'torch.optim', 'random', 
     'pandas',
     'av',
-    'cv2'
+    'cv2',
+    'sklearn', 'sklearn.metrics'
     ]
