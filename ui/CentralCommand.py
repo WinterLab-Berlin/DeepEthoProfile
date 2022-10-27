@@ -22,6 +22,9 @@ from TaskState import TaskState
 from PhenoTask import PhenoTask
 
 class CentralCommand:
+    '''
+    Provides the communication between the Docker instances and the user interface.
+    '''
     def __init__(self, taskList):
         print('init CentralCommand')
         self.taskList = taskList

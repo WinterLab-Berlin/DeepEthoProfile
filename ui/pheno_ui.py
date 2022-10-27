@@ -23,20 +23,11 @@ from TaskList import TaskList
 from TaskState import TaskState
 
 class pheno_ui(QtWidgets.QMainWindow):
-    """
+    '''
     The pheno_ui loads the graphic definition from MainWindow.ui and exposes the functionality to the user.
 
     Takes one optional parameter, the number of Docker processing instances - default is 1
-    """
-
-    #: Maximum number of processing tasks that will be running in parallel
-    nProcTasks: int
-
-    #: Contains all the added files, both processed and queued
-    taskList: TaskList
-    taskCounter: int
-    firstTask: bool
-    
+    '''
     def __init__(self, nProcTasks = 1, parent=None):
         super(pheno_ui, self).__init__(parent)
 
@@ -53,6 +44,22 @@ class pheno_ui(QtWidgets.QMainWindow):
         self.taskCounter = 0
         self.firstTask = True
 
+    #: Maximum number of processing tasks that will be running in parallel
+    nProcTasks: int
+
+    #: Contains all the added files, both processed and queued
+    taskList: TaskList
+
+    #: Contains the data view as it is displayed in the main window
+    tableData: []
+
+    #: The background object handling the execution of the annotation processes and
+    #: the related communication between them and the user interface
+    cc: CentralCommand
+    taskCounter: int
+    firstTask: bool
+    
+
 
     def connectSignalsSlots(self):
         self.actionQuit.triggered.connect(self.close)
@@ -60,6 +67,9 @@ class pheno_ui(QtWidgets.QMainWindow):
         self.actionAddMultiple.triggered.connect(self.addMultipleClicked)
 
     def connectTableView(self):
+        '''
+        Connects the tableData to the main window
+        '''
         self.tableData = [] #[[0, 'some long file name here for test', 0, 0]]
         self.tableModel = TaskTableModel(self.tableData)
 
@@ -69,6 +79,9 @@ class pheno_ui(QtWidgets.QMainWindow):
         self.listLayout.addWidget(self.tableView)
 
     def addMultipleClicked(self):
+        '''
+        Opens the add_multiple dialog that allows to select and add several video files at once
+        '''
         self.addWindow = add_multiple()
         #        print('display dialog')
         if self.addWindow.exec():
@@ -82,6 +95,9 @@ class pheno_ui(QtWidgets.QMainWindow):
             print('cancelled ')
 
     def addTaskClicked(self):
+        '''
+        Opens the add_task dialog that allows to select, view, and add one video file to be processed
+        '''
         self.addWindow = add_task()
 #        print('display dialog')
         if self.addWindow.exec():
@@ -93,7 +109,10 @@ class pheno_ui(QtWidgets.QMainWindow):
             print('cancelled ')
 
     def addNewFile(self, file):
-  #      print('added new file: ', file)
+        '''
+        Adds new file to taskList and sets the appropiate events
+        '''
+
         self.taskCounter = self.taskCounter + 1
 
         newTask = self.taskList.addVideo(self.taskCounter, file)

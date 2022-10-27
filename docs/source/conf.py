@@ -49,6 +49,7 @@ epub_show_urls = 'footnote'
 
 #autoclass_content = 'both'
 autodoc_class_signature = 'mixed'
+autodoc_member_order = 'bysource'
 #autodoc_typehints = "description"
 
 autodoc_mock_imports = [

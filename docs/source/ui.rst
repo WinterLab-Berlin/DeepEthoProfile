@@ -5,11 +5,14 @@ UI
 --
 
 
-.. automodule:: pheno_ui
-
-.. autoclass:: pheno_ui.pheno_ui
+.. autoclass:: pheno_ui.pheno_ui(nProcTasks)
       :members:
+
+
+Communication
+-------------
+
+
 .. autoclass:: CentralCommand.CentralCommand
       :members:
-      :undoc-members:
-   
+
