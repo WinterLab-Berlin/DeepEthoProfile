@@ -6,13 +6,27 @@ UI
 
 
 .. autoclass:: pheno_ui.pheno_ui(nProcTasks)
-      :members:
-
+    :members:
+add_task
+add_multiple
+TaskTableModel
+WAddVideo.ui
+MainWindow.ui
+AddVideo.ui
+AddMultiple.ui
 
 Communication
 -------------
 
 
 .. autoclass:: CentralCommand.CentralCommand
-      :members:
+    :members:
+
+
+.. autoclass:: PhenoTask.PhenoTask
+    :members:
+
+
+.. autoclass:: PortPool.PortPool
+    :members:
 

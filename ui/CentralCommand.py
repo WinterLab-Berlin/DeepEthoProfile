@@ -20,15 +20,23 @@ from ProcessingComm import ProcessingComm
 from PortPool import PortPool
 from TaskState import TaskState
 from PhenoTask import PhenoTask
+from TaskList import TaskList
 
 class CentralCommand:
     '''
     Provides the communication between the Docker instances and the user interface.
+
     '''
+
+    #: Contains the list of all the video files that were added by the user. Is passed as parameter when instantiating the class.
+    taskList: TaskList
+
+    #: A list of ports currently available for opening communication channels to Docker images.
+    procPortPool: PortPool
+
     def __init__(self, taskList):
         print('init CentralCommand')
         self.taskList = taskList
-#        self.guiFiles = Queue()
 
         self.started = True
 

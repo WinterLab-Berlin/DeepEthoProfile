@@ -37,15 +37,17 @@ class add_task(QtWidgets.QDialog):
             if(len(filenames) > 0):
                 self.setVideoFile(filenames[0])
 
-
+        
+    def setVideoFile(self, filename):
+        self.ui.fileText.setText(filename)
 
         self.player = QtMultimedia.QMediaPlayer(None, QtMultimedia.QMediaPlayer.VideoSurface)
         self.player.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(filename)))
         self.player.setVideoOutput(self.ui.displayWidget)
         self.player.play()
-
+        
         self.ui.addBtn.setEnabled(True)
-
+        
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     w = add_task()
