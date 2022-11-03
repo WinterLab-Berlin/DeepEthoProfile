@@ -21,8 +21,14 @@ Integration
       :members:
       :undoc-members:
 
-ProcessVideo
-Logger
+.. autoclass:: ProcessVideo.ProcessVideo
+      :members:
+      :undoc-members:
+
+.. autoclass:: Logger.Logger
+      :members:
+      :undoc-members:
+
 
 Training and Testing
 --------------------
