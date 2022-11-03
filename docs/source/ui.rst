@@ -27,6 +27,10 @@ Communication
 .. autoclass:: CentralCommand.CentralCommand
     :members:
     :undoc-members:
+    
+.. autoclass:: ProcessingComm.ProcessingComm
+    :members:
+    :undoc-members:    
 
 .. autoclass:: PhenoTask.PhenoTask()
     :members:
@@ -40,4 +44,6 @@ Communication
     :members:
     :undoc-members:
 
+.. autoclass:: TaskList.TaskList
+    :members:
 

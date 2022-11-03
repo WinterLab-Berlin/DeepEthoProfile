@@ -1,20 +1,28 @@
-CNN
-===
+Processing module
+=================
 
-Definition
-----------
+Main Processing
+---------------
 
 .. autoclass:: EthoCNN.EthoCNN
       :members:
       :undoc-members:
       
-SW Integration
---------------
+StackFrames
+
+.. autoclass:: DataReaderAV.DataReaderAV
+      :members:
+      :undoc-members:
+
+Integration
+-----------
 
 .. autoclass:: ProcComm.ProcComm
       :members:
       :undoc-members:
 
+ProcessVideo
+Logger
 
 Training and Testing
 --------------------
@@ -22,4 +30,18 @@ Training and Testing
 .. autoclass:: TrainModel.TrainModel
       :members:
       :undoc-members:
+
+.. autoclass:: TrainInterval.TrainInterval
+      :members:
+      :undoc-members:
    
+.. autoclass:: TestModel.TestModel
+      :members:
+      :undoc-members:
+   
+.. autoclass:: TestInterval.TestInterval
+      :members:
+      :undoc-members:
+   
+   
+SelectTrainingData

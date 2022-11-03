@@ -3,7 +3,7 @@
 """
 Logger class
 
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 from time import sleep, strftime
