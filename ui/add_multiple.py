@@ -21,7 +21,14 @@ from pathlib import Path
 class add_multiple(QtWidgets.QDialog):
     """
     Dialog allowing the selection and adding of multiple videos from one folder at once.
+    
+    The visual representation is specified in *AddMultiple.ui* file.
+
     """
+    
+    #: Array of paths to selected video files. The :class:`pheno_ui.pheno_ui` instance will check this array for new videos to be added in the processing queue.
+    videoList: []
+    
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = uic.loadUi(os.path.join(os.path.dirname(__file__), "AddMultiple.ui"), self)
@@ -38,6 +45,8 @@ class add_multiple(QtWidgets.QDialog):
     def browseButtonClicked(self):
         '''
         Opens the selection dialog `QFileDialog`
+        
+        In the case of successful selection, the paths to the videos will be stored in :data:`videoList`.
         '''
         # print('browse')
         home_dir = str(Path.home())

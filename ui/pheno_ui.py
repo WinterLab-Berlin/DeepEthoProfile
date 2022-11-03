@@ -60,6 +60,14 @@ class pheno_ui(QtWidgets.QMainWindow):
     firstTask: bool
     
 
+    def startCommServer(self):
+        '''
+        Constructs a :class:`CentralCommand.CentralCommand` object in :data:`cc` and start it in the background.
+    
+        '''
+        self.cc = CentralCommand(self.taskList)
+        self.cc.start(self.nProcTasks)
+
     def connectSignalsSlots(self):
         """
         Establishes communication between :class:`pheno_ui` and the GUI signals.
@@ -70,7 +78,7 @@ class pheno_ui(QtWidgets.QMainWindow):
 
     def connectTableView(self):
         """
-        Connects the *tableData* to the main window. 
+        Connects the :data:`tableData` to the main window. 
         This data will be displayed in a table according to the specification 
         from :class:`TaskTableModel.TaskTableModel`
         """
@@ -169,26 +177,13 @@ class pheno_ui(QtWidgets.QMainWindow):
                 crtEntry[2] = progress
                 self.tableModel.layoutChanged.emit()
 
-    def addNewTask(self, index, file):
-        print('connect to server')
-
     def closeEvent(self, event):
-        self.close()
-        event.accept()
-
-    def close(self):
+        '''
+        Calls the stop method of the :class:`CentralCommand.CentralCommand` instance in :data:`cc` before exiting.
+        '''
         self.cc.stop()
         print('close call')
-
-    
-    def startCommServer(self):
-        '''
-        Construct a :class:`CentralCommand.CentralCommand` object in :data:`cc` and start it in the background.
-
-        '''
-        self.cc = CentralCommand(self.taskList)
-        self.cc.start(self.nProcTasks)
-    
+        event.accept()
 
 
 if __name__ == '__main__':

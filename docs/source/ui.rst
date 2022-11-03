@@ -8,9 +8,6 @@ UI
     :members:
     :show-inheritance:
     
-.. autoclass:: TaskTableModel.TaskTableModel(data)
-    :members:
-    
 .. autoclass:: add_task.add_task()
     :members:
     :show-inheritance:
@@ -19,9 +16,10 @@ UI
     :members:
     :show-inheritance:
     
-
-#AddVideo.ui
-#AddMultiple.ui
+.. autoclass:: TaskTableModel.TaskTableModel(data)
+    :members:
+    :show-inheritance:
+    
 
 Communication
 -------------
@@ -30,7 +28,7 @@ Communication
     :members:
     :undoc-members:
 
-.. autoclass:: PhenoTask.PhenoTask
+.. autoclass:: PhenoTask.PhenoTask()
     :members:
     :undoc-members:
 

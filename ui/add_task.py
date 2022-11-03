@@ -18,6 +18,11 @@ from PyQt5.QtCore import *
 from pathlib import Path
 
 class add_task(QtWidgets.QDialog):
+    '''
+    Dialog that allows to select, view, and add a video to the processing queue.
+    
+    The visual representation is specified in *AddVideo.ui* file.
+    '''
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = uic.loadUi(os.path.join(os.path.dirname(__file__), "AddVideo.ui"), self)
@@ -25,9 +30,17 @@ class add_task(QtWidgets.QDialog):
         self.connectSignalsSlots()
 
     def connectSignalsSlots(self):
+        '''
+        Establishes communication between :class:`add_task` and the GUI signals.
+        '''
         self.ui.browseButton.clicked.connect(self.browseButtonClicked)
     
     def browseButtonClicked(self):
+        '''
+        Opens the selection dialog `QFileDialog`
+        
+        In case of success, calls :meth:`setVideoFile` to displays the video in the current dialog. 
+        '''
         home_dir = str(Path.home())
         bfd = QFileDialog(self, 'Choose recording', home_dir + "/Videos/test/", "Videos(*.mkv)")
 #        bfd.setFileMode(QFileDialog.ExistingFiles)
@@ -39,6 +52,13 @@ class add_task(QtWidgets.QDialog):
 
         
     def setVideoFile(self, filename):
+        '''
+        Creates a :class:`QtMultimedia.QMediaPlayer` instance and loads the video in the file that was passed as parameter. 
+
+        :param filename: The path to the video to be displayed
+        :type filename: string
+
+        '''
         self.ui.fileText.setText(filename)
 
         self.player = QtMultimedia.QMediaPlayer(None, QtMultimedia.QMediaPlayer.VideoSurface)

@@ -10,6 +10,9 @@ from PyQt5.QtCore import QModelIndex, Qt, QAbstractTableModel
 from PyQt5 import QtWidgets
 
 class TaskTableModel(QAbstractTableModel):
+    '''
+    Models the table representation of the processing queue
+    '''
     def __init__(self, data=[[]], parent=None):
         super().__init__(parent)
         self.data = data
