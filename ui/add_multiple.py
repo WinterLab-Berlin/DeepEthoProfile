@@ -19,6 +19,9 @@ from pathlib import Path
 
 
 class add_multiple(QtWidgets.QDialog):
+    """
+    Dialog allowing the selection and adding of multiple videos from one folder at once.
+    """
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = uic.loadUi(os.path.join(os.path.dirname(__file__), "AddMultiple.ui"), self)
@@ -27,10 +30,15 @@ class add_multiple(QtWidgets.QDialog):
         self.connectSignalsSlots()
 
     def connectSignalsSlots(self):
+        '''
+        Establishes communication between :class:`add_multiple` and the GUI signals.
+        '''
         self.ui.selectVideosButton.clicked.connect(self.browseButtonClicked)
-        #self.ui.addBtn.clicked.connect(self.addButtonClicked)
 
     def browseButtonClicked(self):
+        '''
+        Opens the selection dialog `QFileDialog`
+        '''
         # print('browse')
         home_dir = str(Path.home())
         bfd = QFileDialog(self, 'Choose recording', home_dir + "/Videos/", "Videos(*.mkv)")

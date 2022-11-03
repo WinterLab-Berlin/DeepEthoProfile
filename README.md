@@ -44,7 +44,9 @@ The current version of the trained model will also be downloaded here.
 Contains the files needed for the user interface
 
 ## Implementation details
-(See paper for details)
+A documentation of the source code can be found here: https://deepethoprofile.readthedocs.io
+
+Read the paper [link] for more details.
 
 ## Training
 The training was performed on a manual annotation database found here[link]

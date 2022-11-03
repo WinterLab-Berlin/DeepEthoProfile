@@ -52,6 +52,10 @@ class CentralCommand:
         #TODO: propagate stop to processes/Docker
 
     def receiveMessage(self, connSocket):
+        """
+            something with :class:`CentralCommand.CentralCommand`
+
+        """
         msgSize = connSocket.recv(2)
 
         if msgSize == b'' or len(msgSize) == 0:

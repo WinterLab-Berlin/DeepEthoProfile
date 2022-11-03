@@ -1,7 +1,7 @@
 """
 Entry point
     - creates the UI and its connections
-    - starts the CentralCommand thread that manages the processing instances
+    - starts the CentralCommand background thread that manages the processing instances
 
 @author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
@@ -24,9 +24,9 @@ from TaskState import TaskState
 
 class pheno_ui(QtWidgets.QMainWindow):
     '''
-    The pheno_ui loads the graphic definition from MainWindow.ui and exposes the functionality to the user.
+    The pheno_ui loads the graphic definition from *MainWindow.ui* and exposes the functionality to the user.
 
-    Takes one optional parameter, the number of Docker processing instances - default is 1
+    Takes one optional parameter, the maximum number of Docker processing instances - default is 1
     '''
     def __init__(self, nProcTasks = 1, parent=None):
         super(pheno_ui, self).__init__(parent)
@@ -47,10 +47,10 @@ class pheno_ui(QtWidgets.QMainWindow):
     #: Maximum number of processing tasks that will be running in parallel
     nProcTasks: int
 
-    #: Contains all the added files, both processed and queued
+    #: Contains all the added files
     taskList: TaskList
 
-    #: Contains the data view as it is displayed in the main window
+    #: Contains the view of data as it is displayed in the table of the main window
     tableData: []
 
     #: The background object handling the execution of the annotation processes and
@@ -60,16 +60,20 @@ class pheno_ui(QtWidgets.QMainWindow):
     firstTask: bool
     
 
-
     def connectSignalsSlots(self):
+        """
+        Establishes communication between :class:`pheno_ui` and the GUI signals.
+        """
         self.actionQuit.triggered.connect(self.close)
         self.actionAdd_video.triggered.connect(self.addTaskClicked)
         self.actionAddMultiple.triggered.connect(self.addMultipleClicked)
 
     def connectTableView(self):
-        '''
-        Connects the tableData to the main window
-        '''
+        """
+        Connects the *tableData* to the main window. 
+        This data will be displayed in a table according to the specification 
+        from :class:`TaskTableModel.TaskTableModel`
+        """
         self.tableData = [] #[[0, 'some long file name here for test', 0, 0]]
         self.tableModel = TaskTableModel(self.tableData)
 
@@ -80,7 +84,7 @@ class pheno_ui(QtWidgets.QMainWindow):
 
     def addMultipleClicked(self):
         '''
-        Opens the add_multiple dialog that allows to select and add several video files at once
+        Opens the :class:`add_multiple.add_multiple` dialog that allows to select and add several video files at once
         '''
         self.addWindow = add_multiple()
         #        print('display dialog')
@@ -96,7 +100,7 @@ class pheno_ui(QtWidgets.QMainWindow):
 
     def addTaskClicked(self):
         '''
-        Opens the add_task dialog that allows to select, view, and add one video file to be processed
+        Opens the :class:`add_task.add_task` dialog that allows to select, view, and add one video file to be processed
         '''
         self.addWindow = add_task()
 #        print('display dialog')
@@ -135,15 +139,31 @@ class pheno_ui(QtWidgets.QMainWindow):
 #        print('last added video: ', self.tableData[lastIndex][0])
 
     def updateState(self, id, state):
-        #TODO: check state - finished?
+        '''
+        Updates the displayed state of a task        
+
+        :param id: The id of the element to be updated
+        :type id: int
+        :param state: The new state
+        :type state: :class:`TaskState.TaskState`
+
+        '''
+
         for crtEntry in self.tableData:
             if(crtEntry[0] == id):
                 crtEntry[3] = state.name
                 self.tableModel.layoutChanged.emit()
 
     def updateProgress(self, id, progress):
- #       print('task {} signal data={}'.format(id, progress))
-        #TODO: check state - finished?
+        '''
+        Updates the displayed execution progress of a task        
+
+        :param id: The id of the element to be updated
+        :type id: int
+        :param progress: The new progress percentage
+        :type progress: float
+        
+        '''
         for crtEntry in self.tableData:
             if(crtEntry[0] == id):
                 crtEntry[2] = progress
@@ -160,8 +180,12 @@ class pheno_ui(QtWidgets.QMainWindow):
         self.cc.stop()
         print('close call')
 
-    #start running CentralCommand object in the background 
+    
     def startCommServer(self):
+        '''
+        Construct a :class:`CentralCommand.CentralCommand` object in :data:`cc` and start it in the background.
+
+        '''
         self.cc = CentralCommand(self.taskList)
         self.cc.start(self.nProcTasks)
     
