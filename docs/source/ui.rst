@@ -4,9 +4,6 @@ Main Application
 UI
 --
 
-Starting the application as described in :ref:`Usage` will run the :mod:`pheno_ui` module to start the application. 
-
-.. automodule:: pheno_ui
 
 .. autoclass:: pheno_ui.pheno_ui(nProcTasks)
     :members:
