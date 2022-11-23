@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
-@author: Andrei Istudor
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 import sys
@@ -11,25 +10,36 @@ from PyQt5 import QtWidgets
 
 class TaskTableModel(QAbstractTableModel):
     '''
-    Models the table representation of the processing queue
+    Models the table representation of the processing queue. 
     '''
     def __init__(self, data=[[]], parent=None):
         super().__init__(parent)
         self.data = data
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: int):
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
-                if section == 0:
-                    return "Id"
-                if section == 1:
-                    return "File"
-                elif section == 2:
-                    return "Status"
-                elif section == 3:
-                    return "Progress"
-            # else:
-            #     return "Task " + str(section)
+    def headerData(self, section: int, orientation: Qt.Orientation, role = Qt.DisplayRole):
+        '''
+        The columns are defined as: **Id | File | Status | Progress**
+        Inherited from **QAbstractTableModel**
+        
+        :param section: the section id
+        :type section: int
+        :param orientation: only the horizontal case is handled
+        :type orientation: Qt.Orientation
+        :param role: defaults to Qt.DisplayRole
+        :type role: TYPE, optional
+
+        '''
+        if orientation == Qt.Horizontal:
+            if section == 0:
+                return "Id"
+            if section == 1:
+                return "File"
+            elif section == 2:
+                return "Status"
+            elif section == 3:
+                return "Progress"
+        # else:
+        #     return "Task " + str(section)
 
     def columnCount(self, parent=None):
         if(len(self.data) > 0):

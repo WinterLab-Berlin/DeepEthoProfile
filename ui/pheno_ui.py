@@ -1,10 +1,13 @@
 """
-Entry point
-    - creates the UI and its connections
-    - starts the CentralCommand background thread that manages the processing instances
+DeepEtoProfile entry point: pheno_ui.py
+ - Defines the :class:`pheno_ui` class
+ - The __main__ method intatiates this class with the number of processing tasks passed as parameter (default = 1) and shows the dialog
 
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
+
+""" 
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+""" 
 
 __version__ = 0.1
 
@@ -21,6 +24,7 @@ from TaskTableModel import TaskTableModel
 from CentralCommand import CentralCommand
 from TaskList import TaskList
 from TaskState import TaskState
+from PhenoTask import PhenoTask
 
 class pheno_ui(QtWidgets.QMainWindow):
     '''
@@ -56,6 +60,8 @@ class pheno_ui(QtWidgets.QMainWindow):
     #: The background object handling the execution of the annotation processes and
     #: the related communication between them and the user interface
     cc: CentralCommand
+    
+    #: Counter for videos already added 
     taskCounter: int
     firstTask: bool
     
@@ -69,19 +75,20 @@ class pheno_ui(QtWidgets.QMainWindow):
         self.cc.start(self.nProcTasks)
 
     def connectSignalsSlots(self):
-        """
+        '''
         Establishes communication between :class:`pheno_ui` and the GUI signals.
-        """
+        '''
         self.actionQuit.triggered.connect(self.close)
         self.actionAdd_video.triggered.connect(self.addTaskClicked)
         self.actionAddMultiple.triggered.connect(self.addMultipleClicked)
 
     def connectTableView(self):
-        """
+        '''
         Connects the :data:`tableData` to the main window. 
         This data will be displayed in a table according to the specification 
         from :class:`TaskTableModel.TaskTableModel`
-        """
+        
+        '''
         self.tableData = [] #[[0, 'some long file name here for test', 0, 0]]
         self.tableModel = TaskTableModel(self.tableData)
 
@@ -93,6 +100,7 @@ class pheno_ui(QtWidgets.QMainWindow):
     def addMultipleClicked(self):
         '''
         Opens the :class:`add_multiple.add_multiple` dialog that allows to select and add several video files at once
+        
         '''
         self.addWindow = add_multiple()
         #        print('display dialog')
@@ -109,6 +117,7 @@ class pheno_ui(QtWidgets.QMainWindow):
     def addTaskClicked(self):
         '''
         Opens the :class:`add_task.add_task` dialog that allows to select, view, and add one video file to be processed
+        
         '''
         self.addWindow = add_task()
 #        print('display dialog')
@@ -122,7 +131,13 @@ class pheno_ui(QtWidgets.QMainWindow):
 
     def addNewFile(self, file):
         '''
-        Adds new file to taskList and sets the appropiate events
+        Adds new file to :data:`taskList` and sets the appropiate events. 
+        A new :class:`PhenoTask.PhenoTask` object is created by calling :func:`TaskList.TaskList.addVideo` with `file` and :data:`taskCounter`
+        
+        Slots are created for the new task's signals and then a new entry is added in :data:`tableData`.
+        
+        :param file: the path to the new video file
+        :type file: str
         '''
 
         self.taskCounter = self.taskCounter + 1
@@ -140,7 +155,7 @@ class pheno_ui(QtWidgets.QMainWindow):
             self.tableView.setColumnWidth(0, 15)
             self.tableView.setColumnWidth(1, 550)
             self.tableView.setColumnWidth(2, 70)
-            self.tableView.setColumnWidth(3, 90)
+            self.tableView.setColumnWidth(3, 100)
             self.firstTask = False
 
 #        lastIndex = len(self.tableData) - 1

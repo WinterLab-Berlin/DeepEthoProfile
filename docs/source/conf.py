@@ -30,6 +30,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.autosectionlabel'
 ]
 #'sphinx.ext.viewcode',
 
@@ -93,7 +94,7 @@ autodoc_member_order = 'bysource'
 add_module_names = False
 
 autodoc_mock_imports = [
-    'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtWidgets.QMainWindow',
+    # 'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtWidgets.QMainWindow',
     'torch', 'torch.nn', 'torch.nn.functional',
     'scipy', 'torch.optim', 'random', 
     'pandas',

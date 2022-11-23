@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
-@author: andrei
+@author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
 
 import os
@@ -62,15 +61,6 @@ class add_multiple(QtWidgets.QDialog):
                     self.videoList.append(f)
                 model = QStringListModel(self.videoList)
                 self.ui.listView.setModel(model)
-
-    def addButtonClicked(self):
-        # print('add')
-        pass
-
-    def setVideoFile(self, filename):
-        self.ui.fileText.setText(filename)
-
-        self.ui.addBtn.setEnabled(True)
 
 
 if __name__ == '__main__':
