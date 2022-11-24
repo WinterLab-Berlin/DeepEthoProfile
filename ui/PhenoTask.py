@@ -5,11 +5,11 @@
 """
 
 from os import path
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5 import QtCore
 
 from TaskState import TaskState
 
-class PhenoTask(QObject):
+class PhenoTask(QtCore.QObject):
     '''
     Class encapsulating one video file and it's current status. 
     
@@ -44,15 +44,17 @@ class PhenoTask(QObject):
     #: Flag to check whether the contents of the task have been changed since last reset.
     changed: bool
     
-  
     #: Signal for updating the progress of the current task
-    progressQt = pyqtSignal(int, float)
-    
+    progressQt: QtCore.pyqtSignal
+
     #: Signal for updating the state of the current task
-    stateQt = pyqtSignal(int, TaskState)
+    stateQt: QtCore.pyqtSignal
+
+    progressQt = QtCore.pyqtSignal(int, float)
+    stateQt = QtCore.pyqtSignal(int, TaskState)
 
     def __init__(self, id, videoPath):
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
 
 
         self.videoPath = videoPath

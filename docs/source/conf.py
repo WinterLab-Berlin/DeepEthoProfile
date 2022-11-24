@@ -4,6 +4,9 @@
 import os
 import sys
 import time
+
+from PyQt5.QtCore import pyqtSignal
+
 from datetime import datetime
 
 from sphinx.application import Sphinx
@@ -94,7 +97,7 @@ autodoc_member_order = 'bysource'
 add_module_names = False
 
 autodoc_mock_imports = [
-    'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtWidgets.QMainWindow',
+    'PyQt5.QtWidgets', 'PyQt5.QtWidgets.QMainWindow',
     'torch', 'torch.nn', 'torch.nn.functional',
     'scipy', 'torch.optim', 'random', 
     'pandas',
