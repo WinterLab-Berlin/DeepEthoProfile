@@ -5,6 +5,7 @@ import os
 import sys
 import time
 
+import PyQt5
 from PyQt5.QtCore import pyqtSignal
 
 from datetime import datetime
