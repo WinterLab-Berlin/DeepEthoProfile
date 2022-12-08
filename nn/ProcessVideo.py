@@ -46,7 +46,8 @@ class ProcessVideo():
         
         #write header
         resultsFile = open(self.outputFile, 'w')
-        resultsFile.write('0:none; 1:drink; 2:eat; 3:groom back; 4:groom; 5:hang; 6:micromovement; 7:rear; 8:rest; 9:walk; v3\n')
+        # resultsFile.write('0:none; 1:drink; 2:eat; 3:groom back; 4:groom; 5:hang; 6:micromovement; 7:rear; 8:rest; 9:walk; v3\n')
+        resultsFile.write('0:drink; 1:eat; 2:mm+; 3:hang; 4:rear; 5:rest; 6:walk; v4\n')
         resultsFile.write('frame;annotation;time\n')
         resultsFile.close()
         

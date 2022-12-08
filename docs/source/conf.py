@@ -1,19 +1,19 @@
 # Configuration file for the Sphinx documentation builder.
 # -- Project information
 
-import os
-import sys
-import time
-from datetime import datetime
+from os.path import dirname, abspath, join
+from sys import path as syspath
+# import time
+# from datetime import datetime
 
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-path = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(path, '../../ui'))
-sys.path.insert(0, os.path.join(path, '../../nn'))
+path = dirname(abspath(__file__))
+syspath.insert(0, join(path, '../../ui'))
+syspath.insert(0, join(path, '../../nn'))
 
 project = 'DeepEthoProfile'
 copyright = '2022, WinterLab-Berlin'
@@ -23,6 +23,15 @@ release = '0.1'
 version = '0.1.0'
 
 # -- General configuration
+
+autodoc_mock_imports = ['random', 'random.random', 'random.randint',
+    'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtWidgets.QMainWindow',
+    'torch', 'torch.nn', 'torch.nn.functional',
+    'scipy', 'scipy.stats', 'torch.optim', 
+    'pandas',
+    'av',
+    'cv2',
+    'sklearn', 'sklearn.metrics']
 
 extensions = [
     'sphinx.ext.duration',
@@ -38,9 +47,12 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
 }
+
 intersphinx_disabled_domains = ['std']
 
 templates_path = ['_templates']
+
+
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -93,12 +105,3 @@ autodoc_member_order = 'bysource'
 #autodoc_typehints = "description"
 add_module_names = False
 
-autodoc_mock_imports = [
-    'PyQt5', 'PyQt5.QtWidgets', 'PyQt5.QtCore', 'PyQt5.QtWidgets.QMainWindow',
-    'torch', 'torch.nn', 'torch.nn.functional',
-    'scipy', 'torch.optim', 'random', 
-    'pandas',
-    'av',
-    'cv2',
-    'sklearn', 'sklearn.metrics'
-    ]

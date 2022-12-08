@@ -4,50 +4,58 @@ Processing module
 Main Processing
 ---------------
 
-.. autoclass:: EthoCNN.EthoCNN
-      :members:
-      :undoc-members:
+.. autoclass:: EthoCNN.EthoCNN(noClasses)
+    :members:
+    :undoc-members:
+    :show-inheritance:
       
-StackFrames
-
 .. autoclass:: DataReaderAV.DataReaderAV
-      :members:
-      :undoc-members:
+    :members:
+    
+Helper functions 
+^^^^^^^^^^^^^^^^
+
+Module **StackFrames** contains functions to prepare the video frames for the CNN input. 
+
+
+.. autofunction:: StackFrames::getTestTensors(x)
+.. autofunction:: StackFrames::getTensors(x, ann=None, modify=False)
+
 
 Integration
 -----------
 
 .. autoclass:: ProcComm.ProcComm
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
 
 .. autoclass:: ProcessVideo.ProcessVideo
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
 
 .. autoclass:: Logger.Logger
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
 
 
 Training and Testing
 --------------------
 
 .. autoclass:: TrainModel.TrainModel
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
 
 .. autoclass:: TrainInterval.TrainInterval
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
    
 .. autoclass:: TestModel.TestModel
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
    
 .. autoclass:: TestInterval.TestInterval
-      :members:
-      :undoc-members:
+    :members:
+    :undoc-members:
    
    
 SelectTrainingData

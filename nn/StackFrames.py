@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# @author: Andrei Istudor     andrei.istudor@hu-berlin.de
 """
-Created on Mon Mar 28 17:16:32 2022
-
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+*StackFrames* - Helper module containing methods that stack 
+single channel frames into one multiple channel image
 """
-
 
 import numpy as np
 import torch
@@ -14,17 +13,21 @@ from random import randint, random
 from scipy import stats
 
 
-def getTesnsorsBin(x, ann=None, pad=6, binPad=2, modify=False):
-    # outi = np.array(np.zeros((1, 2*b-1, 256, 256)))
-    # outa = np.zeros(bins, dtype=np.long)
 
-    for i in range(pad, len(x) - pad, binPad):
-        print('stack')
-        #TODO: same as the old one, mostly
-        #stack frames
-        #compute ann
-        
 def getTestTensors(x):
+    '''
+    Computes tensors for processing/testing. Every 6th image in ``x`` is stacked together 
+    with the 5 five previous and the 5 following following images to form a new 11 channel image.
+    A `torch.Tensor` is created from the array containing these new images.
+    
+    If cuda is available, the data is also copied to cuda memory.
+    
+    :param x: input frames, single channel
+    :type x: array
+    :return: tensor containing the stacked images
+    :rtype: torch.Tensor
+
+    '''
     n = len(x) #64
     # lp = pos[0].shape
     b = 6
@@ -52,7 +55,34 @@ def getTestTensors(x):
     
 
 
-def getTensors(x, ann=None, modify=False): #pos, 
+def getTensors(x, ann=None, modify=False):
+    '''
+    Compute tensors for training. Every 8th image in ``x`` is stacked together 
+    with the 5 five previous and the 5 following following images to form a new 11 channel image.
+    A `torch.Tensor` is created from the array containing these new images.
+    
+    If ``modify`` is True, some geometric transformations will be applied to 80% of the stacked images. 
+    This helps the training process.
+    
+    If annotation data is provided, a similar process occurs here too. For every 8th annotation, 
+    the 5 previous and the 5 following annotations are also considered. The dominant
+    annotation in the set is selected, the one in the middle is prefered when there is a tie.
+    This way the very short/noisy annotation events are ignored.
+    A `torch.Tensor` is created from the array containing these new annotations.
+    
+    If cuda is available, the data is also copied to cuda memory.
+    
+    :param x: input frames, single channel
+    :type x: array
+    :param ann: annotation data, defaults to None
+    :type ann: array, optional
+    :param modify: True value triggers geometric altering of the image data, defaults to False
+    :type modify: bool, optional
+    :return: a tensor containing the stacked images and one containing the annotation tensor, or None
+    :rtype: torch.Tensor, torch.Tensor
+
+    '''
+
     n = len(x) 
     # lp = pos[0].shape
     b = 6
@@ -72,7 +102,7 @@ def getTensors(x, ann=None, modify=False): #pos,
     for i in range(bins):
         ii = i * step + b - 1
     
-        if(random() > 0.9):
+        if(random() > 0.8):
             modify = False
             
         if(modify):
@@ -169,3 +199,16 @@ def getTensors(x, ann=None, modify=False): #pos,
     else:
         return xt, None
 
+def getTensorsBin(x, ann=None, pad=6, binPad=2, modify=False):
+    # outi = np.array(np.zeros((1, 2*b-1, 256, 256)))
+    # outa = np.zeros(bins, dtype=np.long)
+
+    for i in range(pad, len(x) - pad, binPad):
+        print('stack')
+        #TODO: same as the old one, mostly
+        #stack frames
+        #compute ann
+        
+if __name__ == '__main__':
+    print("StackFrames:")
+        

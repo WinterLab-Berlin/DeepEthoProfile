@@ -43,5 +43,5 @@ Communication
 
 .. autoclass:: TaskState.TaskState
     :members:
-    :undoc-members:
+    :show-inheritance:
 

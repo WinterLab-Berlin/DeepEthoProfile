@@ -41,8 +41,8 @@ class PhenoTask(QtCore.QObject):
     #: The current state of this task, initialized to :data:`TaskState.new`
     state: TaskState
     
-    #: Flag to check whether the contents of the task have been changed since last reset.
-    changed: bool
+    # #: Flag to check whether the contents of the task have been changed since last reset.
+    # changed: bool
     
     #: Signal for updating the progress of the current task
     progressQt: QtCore.pyqtSignal
@@ -66,7 +66,7 @@ class PhenoTask(QtCore.QObject):
         self.dirPath = h
         self.fileName = t
 
-        self.changed = True
+        # self.changed = True
 
     def setState(self, state):
         '''
@@ -81,7 +81,7 @@ class PhenoTask(QtCore.QObject):
         if state is not self.state:
             self.state = state
             self.progress = 0
-            self.setChanged(True)
+            # self.setChanged(True)
             #print('Task {} changed state to {}'.format(self.id, self.state))
             self.stateQt.emit(self.id, self.state)
 
@@ -94,7 +94,7 @@ class PhenoTask(QtCore.QObject):
 
         '''
         self.progress = progress
-        self.setChanged(True)
+        # self.setChanged(True)
         #TODO: emit changed progress - for GUI
         self.progressQt.emit(self.id, self.progress)
 
@@ -118,25 +118,25 @@ class PhenoTask(QtCore.QObject):
         '''
         return self.fileName
 
-    def setChanged(self, value):
-        '''
-        Sets :data:`changed` to the value in parameter.
+    # def setChanged(self, value):
+    #     '''
+    #     Sets :data:`changed` to the value in parameter.
         
-        :param value: new value
-        :type value: bool
+    #     :param value: new value
+    #     :type value: bool
 
-        '''
-        self.changed = value
+    #     '''
+    #     self.changed = value
         
-    def getChanged(self):
-        '''
-        Return the current value of :data:`changed` 
+    # def getChanged(self):
+    #     '''
+    #     Return the current value of :data:`changed` 
         
-        :return: value
-        :rtype: bool
+    #     :return: value
+    #     :rtype: bool
 
-        '''
-        return self.changed
+    #     '''
+    #     return self.changed
 
 
 if __name__ == '__main__':
