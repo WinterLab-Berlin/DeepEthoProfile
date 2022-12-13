@@ -40,7 +40,7 @@ class EthoCNN(nn.Module):
     cf_s: int #8
     
     #: number of channels of the last convolution layer
-    cf_n:int #256
+    cf_n: int #256
     
     #: normalization layer for the input image N(11 channels)
     bn1: nn.BatchNorm2d 
@@ -79,6 +79,9 @@ class EthoCNN(nn.Module):
         super(EthoCNN, self).__init__()
         
         self.noClasses = noClasses
+        
+        #deprecated, not used anymore
+        self.noPosFeatures = 0 #24 #32 #28
 
         self.fc_size = 4096
         self.cf_s = 8
@@ -89,6 +92,9 @@ class EthoCNN(nn.Module):
         self.c12 = nn.Conv2d(11, 64, (1, 11), padding=(0,5), stride=2)
         self.c13 = nn.Conv2d(11, 64, (7, 3), padding=(3,1), stride=2)
         self.c14 = nn.Conv2d(11, 64, (3, 7), padding=(1,3), stride=2)
+        
+        #deprecated, not used anymore
+        self.bn2 = nn.BatchNorm2d(256, track_running_stats=False)
         
         self.c2 = nn.Conv2d(256, 384, 7, stride=2) # need to compromise for the mem
         self.c3 = nn.Conv2d(384, 512, 5)

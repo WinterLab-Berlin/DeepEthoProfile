@@ -11,10 +11,31 @@ from EthoCNN import EthoCNN
 import torch
 from pandas import DataFrame
 
-from DataReaderAV import DataReaderAV
+from DataReaderAV import DataReaderAV, mapAnn
 from StackFrames import getTestTensors
 
 class ProcessVideo():
+    '''
+    Wrapper for the instiating the CNN with a specified model and using it to process a video file. 
+    
+    
+    '''
+
+    #: the full path to the video that will be processed by the current instance
+    videoFile: str
+    
+    #: the full path to the output file where the results will be stored
+    outputFile: str
+    
+    #: full path to trained model that will be used
+    modelPath: str
+    
+    #: number of classed used by the model (current model uses 10)
+    noClasses: str
+    
+    #: maximum number of frames that will be read and processed at a time - depends on the available memory
+    segSize: int
+
     def __init__(self, modelPath, noClasses, videoFile, outputFile, segSize=125): 
         self.videoFile = videoFile
         self.outputFile = outputFile
@@ -23,6 +44,32 @@ class ProcessVideo():
         self.segSize = segSize
         
     def process(self, logger):
+        '''
+        Generator function for behaviour classification.
+        
+        Creates a :class:`EthoCNN.EthoCNN` instance with :data:`noClasses` outputs 
+        and loads the trained model present in :data:`modelPath`. The resulting 
+        object will be running in evaluation mode, and, if available, on the CUDA environment.
+        
+        For each call, the method will process a maximum of :data:`segSize` frames,
+        store the results in the output file and return the percentage to the
+        total frames that have been processed so far.
+        
+        Each classification is done for a set of 11 frames. The process is 
+        performed with a stride of 5. The result is then attributed to the 
+        frame in the middle of the interval and the 3 frames to the left and 
+        the 2 frames to the right. Therefore there are no behaviour bouts 
+        shorter than 240ms. This is conform to the behaviour definition and 
+        avoides noisy results, while speeding up the processing.
+        
+        The current output contains these behaviours: drink, eat, mm+, hang, rear, rest, and walk
+        
+        :param logger: simple logger used mostly for debugging
+        :type logger: Logger.Logger
+        :yield: the percentage of frames already processed
+        :rtype: int
+
+        '''
         # print('process video')
         self.model = EthoCNN(self.noClasses)
         self.model.load_state_dict(torch.load(self.modelPath))
@@ -32,8 +79,7 @@ class ProcessVideo():
                 
         self.model.eval()
         
-        logger.log('open video {}'.format(self.videoFile))
-        
+        #reads the frames from videoFile in segSize blocks.
         reader = DataReaderAV(logger, self.videoFile)
         if(reader.open() is False):
             print('cannot open video ', self.videoFile)
@@ -55,7 +101,7 @@ class ProcessVideo():
         with torch.no_grad():
             while(True):
                 # model.zero_grad()
-                # logger.log('read frames')
+                logger.log('read frames')
                 dataSegment = reader.readFrames(self.segSize)
                 
                 if(len(dataSegment) == 0):
@@ -76,6 +122,10 @@ class ProcessVideo():
             
                 predex = np.zeros(len(dataSegment) , dtype=np.int32)
                 bins = int((len(dataSegment) -5)/6)
+                
+                #map results
+                for ia in range(len(final_pred)):
+                    final_pred[ia] = mapAnn(final_pred[ia])
                 
                 predex[0] = final_pred[0]
                 predex[1] = final_pred[0]
