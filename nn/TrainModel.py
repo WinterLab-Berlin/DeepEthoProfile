@@ -99,7 +99,7 @@ class TrainModel():
         self.trainIntervals.append(newTrainInterval)
         
         
-    def trainFullStep(self):
+    def trainEpoch(self):
         '''
         Train an epoch. 
         
@@ -170,7 +170,7 @@ class TrainModel():
             if(self.running):
                 shuffle(self.trainIntervals)
                 
-                avgCost = self.trainFullStep(i)
+                avgCost = self.trainEpoch()
                 print('FULL STEP! avg cost is: ', avgCost)
                 
                 if(i > 0):
@@ -262,21 +262,21 @@ if __name__ == "__main__":
     
     epochs = 13
     
-    # #train
-    # trainModel = TrainModel(noClasses, log)
+    #train
+    trainModel = TrainModel(noClasses, log)
     
-    # for videoFile in glob.glob(trainVideoPath + '*.avi'):
-    #     annFile = videoFile.replace('.avi', '_ann.csv')
-    #     if(path.exists(annFile)): 
-    #         trainModel.addTrainInterval(videoFile, annFile)
-    #     else:
-    #         print('missing data for file ', videoFile)
+    for videoFile in glob.glob(trainVideoPath + '*.avi'):
+        annFile = videoFile.replace('.avi', '_ann.csv')
+        if(path.exists(annFile)): 
+            trainModel.addTrainInterval(videoFile, annFile)
+        else:
+            print('missing data for file ', videoFile)
 
 
-    # trainModel.train(epochs)
-    # #trainModel.saveModel(modelPath)
-    # trainModel.cleanup()
-    # del trainModel
+    trainModel.train(epochs)
+    #trainModel.saveModel(modelPath)
+    trainModel.cleanup()
+    del trainModel
     
     
     #test    
@@ -292,22 +292,22 @@ if __name__ == "__main__":
         print('test annotations folder: ', annFolder)
         
         
-        # for x in range(4, epochs):#epochs-10):
-        modelName = 'mouse_v2.model' 
-        # modelName = 'step_{}.model'.format(x)#epochs - x)
-        print(' - - - testing model: {} - - - '.format( modelName))
-        testModel = TestModel(noClasses, modelName, log)
-        
-        for crtVideo in glob.glob(dataFolder + '*.avi'):
-            crtAnn = crtVideo.replace('.avi', '.csv')
-            if(path.exists(crtAnn)): 
-                testModel.addTestInterval(crtVideo, crtAnn)
-            else:
-                print('missing data for file ', crtVideo)
+        for x in range(4, epochs):#epochs-10):
+            # modelName = 'mouse_v2.model' 
+            modelName = 'step_{}.model'.format(x)#epochs - x)
+            print(' - - - testing model: {} - - - '.format( modelName))
+            testModel = TestModel(noClasses, modelName, log)
+            
+            for crtVideo in glob.glob(dataFolder + '*.avi'):
+                crtAnn = crtVideo.replace('.avi', '.csv')
+                if(path.exists(crtAnn)): 
+                    testModel.addTestInterval(crtVideo, crtAnn)
+                else:
+                    print('missing data for file ', crtVideo)
                 
-        print('added test files')
-        testModel.test()
-        del testModel
+            print('added test files')
+            testModel.test()
+            del testModel
     else:
         print('no testing data')
         
