@@ -56,10 +56,11 @@ class ProcessVideo():
         total frames that have been processed so far.
         
         Each classification is done for a set of 11 frames. The process is 
-        performed with a stride of 5. The result is then attributed to the 
-        frame in the middle of the interval and the 3 frames to the left and 
-        the 2 frames to the right. Therefore there are no behaviour bouts 
-        shorter than 240ms. This is conform to the behaviour definition and 
+        performed with a stride of 5 as described in :class:`StackFrames.getTestTensors`. 
+        The result is then attributed to the frame in the middle of the interval,
+        the 3 frames before, and the 2 frames right after that. 
+        Therefore there are no behaviour bouts  shorter than 240ms. 
+        This is conform to the behaviour definition and 
         avoides noisy results, while speeding up the processing.
         
         The current output contains these behaviours: drink, eat, mm+, hang, rear, rest, and walk
@@ -71,13 +72,13 @@ class ProcessVideo():
 
         '''
         # print('process video')
-        self.model = EthoCNN(self.noClasses)
-        self.model.load_state_dict(torch.load(self.modelPath))
+        model = EthoCNN(self.noClasses)
+        model.load_state_dict(torch.load(self.modelPath))
 
         if torch.cuda.is_available():
-           self.model.to(torch.device('cuda'))
+           model.to(torch.device('cuda'))
                 
-        self.model.eval()
+        model.eval()
         
         #reads the frames from videoFile in segSize blocks.
         reader = DataReaderAV(logger, self.videoFile)
@@ -114,8 +115,8 @@ class ProcessVideo():
 
                 xt = getTestTensors(x)
 
-            # Forward pass: Compute predicted y by passing x to the model
-                crt_y = self.model(xt)
+                # compute predicted annotations by passing the stacked images to the model
+                crt_y = model(xt)
                 npPred = crt_y.data.cpu().numpy()
             
                 final_pred = np.argmax(npPred, axis=1)
@@ -158,7 +159,7 @@ class ProcessVideo():
                 t = t + 1
                 
         del reader
-        del self.model  
+        del model
             
         import gc
         gc.collect()

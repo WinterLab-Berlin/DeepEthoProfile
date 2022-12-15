@@ -37,7 +37,8 @@ def mapAnn(oldAnn):
     elif(oldAnn == 9):                  # old walk
         newAnn = 6                      # new walk
     else:
-        print('invalid ann: ', oldAnn)
+        # print('invalid ann: ', oldAnn)
+        newAnn = 2
 
     return newAnn
 
@@ -65,7 +66,7 @@ class DataReaderAV():
     #: the total number of frames in the selected video stream
     totalFrames: int
    
-    #: shared logging handle 
+    #: simple shared logger used mostly for debugging
     logger: Logger
 
     def __init__(self, logger, videoFilePath, annFilePath=None): 

@@ -11,52 +11,76 @@ import torch
 from sklearn.metrics import accuracy_score
 
 # from DataReader import DataReader
-from DataReaderAV import DataReaderAV
+from DataReaderAV import DataReaderAV, mapAnn
 from StackFrames import getTensors, getTestTensors
-
-
-def setBNTrain(m):
-   if isinstance(m, torch.nn.BatchNorm2d) or isinstance(m, torch.nn.BatchNorm1d) or isinstance(m, torch.nn.LSTM):
-      m.train()
-      
-def setDropEval(m):
-   if isinstance(m, torch.nn.Dropout2d):
-      m.eval()
+from Logger import Logger
 
 
 class TestInterval():
-    def __init__(self, path, noClasses, videoFile, annFile, logger): #posFile, 
+    '''
+    Class for testing a saved model against a video file and the associated annotation file.
+    '''
+
+    #: path to the saved model that will be tested
+    modelPath: str
+    
+    #: number of classes the model is initialized with
+    noClasses: int
+    
+    #: path to the video file that will be used
+    videoFile: str
+    
+    #: path to the annotation file that will be used
+    annFile: str
+    
+    #: the maximum number of frames that will be processed in parallel
+    segSize: int
+    
+    #: simple logger used mostly for debugging
+    logger: Logger
+
+    def __init__(self, modelPath, noClasses, videoFile, annFile, logger): #posFile, 
         self.videoFile = videoFile
         self.annFile = annFile
-        # self.posFile = posFile
-        
-        #self.model = model
         
         self.segSize = 125
         
         self.noClasses = noClasses
-        self.path = path
+        self.modelPath = modelPath
         
         self.logger = logger
             
         
     def test(self):
+        '''
+        Loads the model at :data:`modelPath` in a new :class:`EthoCNN.EthoCNN` instace with :data:`noClasses` outputs.
+        This will be used to classify all the frames in the video found at :data:`videoFile` location.
+        The process is split into steps of maximum :data:`segSize` frames.
+        
+        The classification is done with a stride of 6, as described in :func:`StackFrames.getTestTensors`. 
+        The result is then attributed to the frame in the middle of the interval,
+        the 3 frames before, and the 2 frames right after that.
+        The current output contains these behaviours: drink, eat, mm+, hang, rear, rest, and walk.
+        
+        These results are then compared to the ones from the annotation file
+        for the corresponding frames to compute the accuracy score and
+        fill the confusion matrix.
+        
+        :return: the accuracy score and the confusion matrix
+        :rtype: float, []
+
+        '''
         # print('test interval')
-        self.model = EthoCNN(self.noClasses)
+        model = EthoCNN(self.noClasses)
             
-        self.model.load_state_dict(torch.load(self.path))
+        model.load_state_dict(torch.load(self.modelPath))
 
         if torch.cuda.is_available():
-           self.model.to(torch.device('cuda'))
+           model.to(torch.device('cuda'))
                 
-        self.model.eval()
-        # for m in self.model.modules():
-        #     if isinstance(m, torch.nn.Dropout2d) or isinstance(m, torch.nn.Dropout):
-        #         m.eval()
+        model.eval()
             
         sumScore = 0
-    
-    #TODO: reset dinamic values
     
         reader = DataReaderAV(self.logger, self.videoFile, self.annFile) 
         if(reader.open() is False):
@@ -64,7 +88,7 @@ class TestInterval():
             return -1
         confusion = np.zeros((self.noClasses, self.noClasses))
         t = 0        
-        #self.model.resetHidden()
+        #model.resetHidden()
         with torch.no_grad():
             while(True):
                 # model.zero_grad()
@@ -82,7 +106,7 @@ class TestInterval():
                 xt = getTestTensors(x)
 
             # Forward pass: Compute predicted y by passing x to the model
-                crt_y = self.model(xt)
+                crt_y = model(xt)
                 npPred = crt_y.data.cpu().numpy()
             
                 final_pred = np.argmax(npPred, axis=1)
@@ -91,6 +115,10 @@ class TestInterval():
                 bins = int((len(dataSegment)-5)/6)
                 
                 # print('bins={}, t={}'.format(bins, t))
+                
+                #map results
+                for ia in range(len(final_pred)):
+                    final_pred[ia] = mapAnn(final_pred[ia])
                 
                 predex[0] = final_pred[0]
                 predex[1] = final_pred[0]
@@ -120,7 +148,7 @@ class TestInterval():
                 # resetModel = False
                 
         del reader
-        del self.model  
+        del model
             
         import gc
         gc.collect()
@@ -132,7 +160,7 @@ class TestInterval():
             return sumScore/t, confusion
         else:
             print('ERROR: something went wrong while processing video: ', self.videoFile)
-            return 0
+            return 0, []
             
 
 

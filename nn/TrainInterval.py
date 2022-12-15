@@ -11,16 +11,44 @@ import torch
 
 from random import randint
 
-# from DataReader import DataReader
+from EthoCNN import EthoCNN
 from DataReaderAV import DataReaderAV
 from sklearn.metrics import accuracy_score
 from StackFrames import getTensors
+from Logger import Logger
 
 class TrainInterval():
+    '''
+    Class to train a model with one annotated video interval. 
+    '''
+
+    #: the path to the video file to be used for training
+    videoFile: str
+    
+    #: the path to the file containing the groundtruth for the video
+    annFile: str
+
+    #: the handle to the model used for training
+    model: EthoCNN
+    
+    #: number of outputs for the current model
+    noClasses: int
+    
+    #: the handle to the optimizer used for updating the model's parameters
+    optimizer: torch.optim.Optimizer
+    
+    #: the handle to the loss class used for computing the lost gradients
+    criterion: torch.nn.CrossEntropyLoss
+    
+    #: the maximum number of frames that will be processed in parallel
+    segSize: int
+    
+    #: simple logger used mostly for debugging
+    logger: Logger
+
     def __init__(self, model, optimizer, criterion, videoFile, annFile, noClasses, logger): #posFile, 
         self.videoFile = videoFile
         self.annFile = annFile
-        # self.posFile = posFile
         
         self.model = model
         self.optimizer = optimizer
@@ -32,6 +60,18 @@ class TrainInterval():
         
     
     def train(self):
+        '''
+        Trains the model at :data:`model` with the frames from :data:`videoFile` against the target in :data:`annFile`
+
+        The process is split into steps of maximum :data:`segSize` frames.
+        The classification is done with a stride of 8, as described in :func:`StackFrames.getTensors`. 
+        For each step, the predicted annotations are computed, then the loss gradients against the target from the manual annotation. 
+        The :data:`optimizer` then updates the model parameters. 
+        
+        :return: the average training cost, the set of target annotations used, the training accuracy score and the corresponding confusion matrix
+        :rtype: float, [], float, []
+
+        '''
         # print('train video: {}, {}, {}'.format(self.videoFile, self.posFile, self.annFile))
         
         loss = 0
@@ -59,31 +99,22 @@ class TrainInterval():
         confusion = np.zeros((self.noClasses, self.noClasses))
 
         while True:
-            # if(stopIndex > 0 and startIndex + (t+1) * self.segSize > stopIndex):
-            #     break
-            
-            # x, pos, y = reader.getTrainingData(startIndex + t * self.segSize + 1, self.segSize)
             dataSegment = reader.readFrames(self.segSize)
             if(len(dataSegment) < 13): #self.segSize):
                 break
 
-            # if(len(dataSegment) < self.segSize):
-            #     print('len = ', len(dataSegment))
             data = np.array(dataSegment, dtype=object)
-            # xt, posT, yt = self.model.getTensors(x, pos, y)
-            # xt, yt = self.model.getTensors(x, y, modify=True)
             x = data[:, 2]
             y = data[:, 3]
             xt, yt = getTensors(x, y, modify=True)
             
             # model.zero_grad()
             self.optimizer.zero_grad()
-            # Forward pass: Compute predicted y by passing x to the model
+
+            # compute predicted annotations by passing the stacked images to the model
             crt_y = self.model(xt) #, posT
             
-            # resetRNN = False
-        
-            # Compute and print loss
+            # Compute loss
             loss = self.criterion(crt_y, yt)
         
             # Zero gradients, perform a backward pass, and update the weights.
@@ -103,7 +134,6 @@ class TrainInterval():
             t = t + 1
             noFrames = noFrames + self.segSize
 
-            ann = yt.data.cpu().numpy()
             for x in ann:
                 annSet[x] = annSet[x] + 1
             
