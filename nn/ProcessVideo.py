@@ -102,7 +102,7 @@ class ProcessVideo():
         with torch.no_grad():
             while(True):
                 # model.zero_grad()
-                logger.log('read frames')
+                # logger.log('read frames')
                 dataSegment = reader.readFrames(self.segSize)
                 
                 if(len(dataSegment) == 0):
