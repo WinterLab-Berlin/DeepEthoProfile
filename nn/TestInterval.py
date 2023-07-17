@@ -11,7 +11,7 @@ import torch
 from sklearn.metrics import accuracy_score
 
 # from DataReader import DataReader
-from DataReaderAV import DataReaderAV, mapAnn
+from DataReaderAV import DataReaderAV, mapAnn2
 from StackFrames import getTensors, getTestTensors
 from Logger import Logger
 
@@ -90,10 +90,8 @@ class TestInterval():
         t = 0        
         #model.resetHidden()
         with torch.no_grad():
-            while(True):
-                # model.zero_grad()
-                dataSegment = reader.readFrames(self.segSize)
-                if(len(dataSegment) == 0):
+            for dataSegment in reader.readFrames(self.segSize):
+                if(len(dataSegment) < 16):
                     break
                 
                 data = np.array(dataSegment, dtype=object)
@@ -147,6 +145,7 @@ class TestInterval():
                 t = t + 1
                 # resetModel = False
                 
+        reader.close()
         del reader
         del model
             

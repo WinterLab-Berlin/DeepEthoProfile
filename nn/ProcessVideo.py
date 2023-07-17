@@ -100,12 +100,9 @@ class ProcessVideo():
         
 
         with torch.no_grad():
-            while(True):
-                # model.zero_grad()
-                # logger.log('read frames')
-                dataSegment = reader.readFrames(self.segSize)
-                
-                if(len(dataSegment) == 0):
+            for dataSegment in reader.readFrames(self.segSize):
+                if(len(dataSegment) < 16):
+                    logger.log('read too few frames: {}'.format(len(dataSegment)))
                     break
                 
                 data = np.array(dataSegment, dtype=object)
@@ -113,9 +110,11 @@ class ProcessVideo():
                 frameIdx = data[:, 0]
                 framePts = data[:, 1]
 
+                # logger.log('get Tensors')
                 xt = getTestTensors(x)
 
                 # compute predicted annotations by passing the stacked images to the model
+                # logger.log('CNN')
                 crt_y = model(xt)
                 npPred = crt_y.data.cpu().numpy()
             
@@ -124,6 +123,8 @@ class ProcessVideo():
                 predex = np.zeros(len(dataSegment) , dtype=np.int32)
                 bins = int((len(dataSegment) -5)/6)
                 
+                # logger.log('unbox')
+
                 #map results
                 for ia in range(len(final_pred)):
                     final_pred[ia] = mapAnn(final_pred[ia])
@@ -154,10 +155,11 @@ class ProcessVideo():
                 perc = int((t * self.segSize * 100 + 1)/ reader.totalFrames)
                 # logger.log('yield {}'.format(perc))
                 # self.model.zero_grad(set_to_none=True)
+                t = t + 1
+
                 yield perc
             
-                t = t + 1
-                
+        reader.close()
         del reader
         del model
             

@@ -42,6 +42,33 @@ def mapAnn(oldAnn):
 
     return newAnn
 
+def mapAnn2(oldAnn):
+    newAnn = 2
+    
+    if(oldAnn == 1):                    # old drink
+        newAnn = 0                      # new drink
+    elif(oldAnn == 2):                  # old eat
+        newAnn = 1                      # new eat
+    elif(oldAnn == 3):                  # old groom back
+        newAnn = 2                      # new groom
+    elif(oldAnn == 4):                  # old groom 
+        newAnn = 2                      # new groom
+    elif(oldAnn == 5):                  # old hang
+        newAnn = 3                      # new hang
+    elif(oldAnn == 6):                  # old mm
+        newAnn = 4                      # new mm
+    elif(oldAnn == 7):                  # old rear
+        newAnn = 5                      # new rear
+    elif(oldAnn == 8):                  # old rest
+        newAnn = 6                      # new rest
+    elif(oldAnn == 9):                  # old walk
+        newAnn = 7                      # new walk
+    else:
+        print('invalid ann: ', oldAnn)
+        newAnn = 2 #defaults to mm
+
+    return newAnn
+
 class DataReaderAV():
     '''
     Class to read video and annotation files together. 
@@ -81,6 +108,7 @@ class DataReaderAV():
 
         # self.seekIndex = None
         self.totalFrames = 1
+        self.start = 0
     
     
     def open(self, streamId = 0, offset = 0):
@@ -104,23 +132,24 @@ class DataReaderAV():
             self.avContainer = av.open(self.videoFile)
             self.avContainer.streams.video[0].thread_type = "FRAME"
 
-            self.videoStream = self.avContainer.streams.video[streamId]
+            self.videoStream = self.avContainer.streams.video[0]
             self.totalFrames = 5000 
             if(self.avContainer.streams.video[streamId].duration):
                 self.totalFrames = (self.avContainer.streams.video[streamId].duration +1 )/ 40
             
             if (self.annFile is not None):
                 self.annData = pd.read_csv(self.annFile, sep=';', header=1)
-
-            if(offset > 0):
-                i = 0
-                for packet in self.avContainer.demux(self.videoStream):
-                    if packet.size == 0:
-                        self.logger.log('skip frames - demux empty packet', verbose)
-                        break
-                    i += 1
-                    if(i >= offset):
-                        break
+                
+            self.start = offset
+            # if(offset > 0):
+            #     i = 0
+            #     for packet in self.avContainer.demux(self.videoStream):
+            #         if packet.size == 0:
+            #             self.logger.log('skip frames - demux empty packet', verbose)
+            #             break
+            #         i += 1
+            #         if(i >= offset):
+            #             break
                         
                 
             return True
@@ -128,6 +157,12 @@ class DataReaderAV():
             self.logger.log('error opening video file: ' + self.videoFile, verbose)
             return False
         
+    def close(self):
+        if (self.annData is not None):
+            del self.annData
+        if(self.avContainer is not None):
+            self.avContainer.close()
+            del self.avContainer
         
         
     def readFrames(self, n):
@@ -155,52 +190,61 @@ class DataReaderAV():
         '''
         result = []
         index = 0
+        fi = 0
+        finished = False
         
-        if(self.videoStream != None and index < n):
-            # self.logger.log('read {} frames'.format(n), verbose)
-            finished = False
+        while(self.videoStream != None and not finished):
+            # self.logger.log('read {} frames'.format(n))
             
             for packet in self.avContainer.demux(self.videoStream):
                 if packet.size == 0:
-                    # self.logger.log('demux empty packet', verbose)
+                    # print('demux empty packet')
+                    finished = True
                     break
                 for frame in packet.decode():
                     crtVFrame = frame.to_ndarray(format='gray')
-                    
+                    if(self.start > 0):
+                        self.start -= 1
+                        continue
+
                     h, w = crtVFrame.shape
                     if (h != 256 or w != 256):
-                        #crop, pad and resize
-                        # outFrame = np.zeros((w, w)) #, dtype=int)
-                        # outFrame[177:527, :] = crtVFrame[90:440, :]
-                        # crtVFrame = resize(outFrame, (256, 256)) #, cv2.INTER_AREA)
-                        
                         crtVFrame = crtVFrame[90:440, :]
                         crtVFrame = cv2.copyMakeBorder(crtVFrame, 177, 177, 0, 0, cv2.BORDER_CONSTANT, None, 0)
                         crtVFrame = cv2.resize(crtVFrame, (256, 256)) 
 
-                    # print(crtVFrame.size)
-                    # print(crtVFrame.shape)
-                    # print(crtVFrame[0].size)
-
-                    
-                    # self.logger.log('frame: {}, ts: {}'.format(frame.index, frame.pts), verbose)
-
                     crtRes = [frame.index, frame.pts, crtVFrame]
+                    fi = frame.index
                     
                     #add annotation
                     if(self.annData is not None):
-                        crtRes.append(mapAnn(self.annData.loc[frame.index, 'annotation']))
+                        if(frame.index >= self.annData.shape[0]):
+                            print('=== no more annotations available for frame {}, ann size={}'.
+                                  format(frame.index, self.annData.shape[0]))
+                            finished = True
+                            break
+                        else:
+                            # print('read')
+                            crtRes.append(mapAnn2(int(self.annData.loc[frame.index, 'annotation'])))
                         
                     result.append(crtRes)
+                            
                     index += 1
                     
                     if index >= n:
-                        finished = True
-                        break
-                if finished:
-                    break
+                        # print('yield step', index)
+                        index = 0
+                        yield result
+                        result = []
                 
-        return result
+            # print('yield rest ', len(result))
+            index = 0
+            yield(result)
+            finished = True
+                
+        # print('read {} frames, now at index {}'.format(n, fi))
+                
+        # return result
 
     # #TODO: 
     # def buildSeekIndex(self):

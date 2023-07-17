@@ -77,7 +77,10 @@ class TrainInterval():
         loss = 0
         avg_cost = 0
 
-        startIndex = randint(0, 6)
+        confusion = np.zeros((self.noClasses, self.noClasses))
+        
+
+        startIndex = randint(0, 10)
         # stopIndex = -1
         
         if(startIndex < 0):
@@ -96,11 +99,9 @@ class TrainInterval():
         annSet = np.zeros(self.noClasses)
         # self.model.resetHidden()
 
-        confusion = np.zeros((self.noClasses, self.noClasses))
-
-        while True:
-            dataSegment = reader.readFrames(self.segSize)
-            if(len(dataSegment) < 13): #self.segSize):
+        for dataSegment in reader.readFrames(self.segSize):
+            if(len(dataSegment) < 16): #self.segSize):
+                # print('read too few frames ', len(dataSegment))
                 break
 
             data = np.array(dataSegment, dtype=object)
@@ -137,12 +138,13 @@ class TrainInterval():
             for x in ann:
                 annSet[x] = annSet[x] + 1
             
+        reader.close()
         del reader
         
-        if(noFrames > 0):
+        if(t > 0):
             # print('trained video: ', self.videoFile, ', avg= ', avg_cost/noFrames)
-            return avg_cost/noFrames, annSet, score, confusion
+            return avg_cost/t, annSet, score/t, confusion
         else:
-            print(' - - skipped training video: ', self.videoFile)
-            return -1, annSet, score, confusion
+            # print(' - - skipped training video: ', self.videoFile)
+            return -1, annSet, 0, confusion
             

@@ -67,13 +67,14 @@ class TestModel:
         ti = 0
         confusion = np.zeros((self.noClasses, self.noClasses))
         with torch.no_grad():
-            print('test {} intervals'.format(len(self.testIntervals)))
+            # print('test {} intervals'.format(len(self.testIntervals)))
             for i in self.testIntervals:
                 if(self.running):
                     ca, cc = i.test()
-                    ta = ta + ca
-                    confusion += cc
-                    ti = ti + 1
+                    if(ca >= 0):
+                        ta = ta + ca
+                        confusion += cc
+                        ti = ti + 1
                 else:
                     break
     

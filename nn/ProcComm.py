@@ -125,16 +125,17 @@ class ProcComm:
 
         '''
 
-        logger.log('process video {} with output {} \n'.format(videoFile, outputFile))
+        logger.log('= process video {} with output {} \n'.format(videoFile, outputFile))
         proc = ProcessVideo('./mouse_v2.model', 10, videoFile, outputFile)
         
         try:
             crtStep = 0
             for x in proc.process(logger):
                 crtStep = crtStep + 1
-                # logger.log('processing step')
+                # logger.log('! processing step', crtStep)
     
                 if(crtStep % 20 == 0):
+                    logger.log('@ processing percent: {} \n'.format(x))
                     mess = 'processing percent: {} \n'.format(x)
                     try:
                         self.sendMessage(mess)
