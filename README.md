@@ -1,7 +1,10 @@
 # DeepEthoProfile
 
 Software to automatically annotate mouse behaviours inside a home cage.
-The solution is based on a CNN that processes stacked frames and classifies first order behaviours
+The solution is based on a CNN that processes video recordings and classifies each frame with one of eight first order behaviours
+
+<img src="https://github.com/WinterLab-Berlin/DeepEthoProfile/blob/main/pics/behaviours_H.jpg" width="700"/>
+
 
 The system was tested to work on a computer running Ubuntu (20.04 or newer) with a NVidia(c) graphic card and CUDA(c) drivers installed. 
 Other required software dependencies are: Docker(c) 20+, Python 3.8+, and PyQt 5+
