@@ -43,7 +43,7 @@ class TestInterval():
         self.videoFile = videoFile
         self.annFile = annFile
         
-        self.segSize = 125
+        self.segSize = 144
         
         self.noClasses = noClasses
         self.modelPath = modelPath
@@ -88,10 +88,12 @@ class TestInterval():
             return -1
         confusion = np.zeros((self.noClasses, self.noClasses))
         t = 0        
+        step = 4
+        # print('opened ann ', self.annFile)
         #model.resetHidden()
         with torch.no_grad():
             for dataSegment in reader.readFrames(self.segSize):
-                if(len(dataSegment) < 16):
+                if(len(dataSegment) < 13):
                     break
                 
                 data = np.array(dataSegment, dtype=object)
@@ -102,7 +104,15 @@ class TestInterval():
                 # y = data[:][3]
                 
                 xt = getTestTensors(x)
+                # xt,  = getTensors(x, ann=None, step=4)
 
+                bins = len(xt)
+                if(bins < 1):
+                    print('no bins for videofile ', self.videoFile)
+                    break
+                
+                # print('frames={}, bins={}, t={}'.format(len(x), bins, t))
+                
             # Forward pass: Compute predicted y by passing x to the model
                 crt_y = model(xt)
                 npPred = crt_y.data.cpu().numpy()
@@ -110,33 +120,39 @@ class TestInterval():
                 final_pred = np.argmax(npPred, axis=1)
             
                 predex = np.zeros(len(dataSegment))
-                bins = int((len(dataSegment)-5)/6)
-                
-                # print('bins={}, t={}'.format(bins, t))
+                # bins = int((len(dataSegment)-5)/6)
                 
                 #map results
-                for ia in range(len(final_pred)):
-                    final_pred[ia] = mapAnn(final_pred[ia])
-                
+                # for ia in range(len(final_pred)):
+                #     final_pred[ia] = mapAnn2(final_pred[ia])
+                # print('npPred is {} and bins is {}'.format(len(npPred), bins))
                 predex[0] = final_pred[0]
                 predex[1] = final_pred[0]
                 predex[2] = final_pred[0]
                 for i in range(bins):
-                    ii = i * 6 + 5
-                    predex[ii-3] = final_pred[i]
+                    ii = i * step + 5
+                    # predex[ii-3] = final_pred[i]
                     predex[ii-2] = final_pred[i]
                     predex[ii-1] = final_pred[i]
                     predex[ii] = final_pred[i]
                     predex[ii+1] = final_pred[i]
                     predex[ii+2] = final_pred[i]
                     predex[ii+3] = final_pred[i]
+                    predex[ii+4] = final_pred[i]
+                    predex[ii+5] = final_pred[i]
+                predex[-6] = final_pred[-1]
+                predex[-5] = final_pred[-1]
+                predex[-4] = final_pred[-1]
                 predex[-3] = final_pred[-1]
                 predex[-2] = final_pred[-1]
                 predex[-1] = final_pred[-1]
                     
+                # print(predex)
+                # print(ii)
+                # print(y)
                 # ann = yt.data.cpu().numpy()
                 score = accuracy_score(y, predex)
-
+                # print(score)
                 for i in range(len(y)):
                     confusion[y[i], int(predex[i])] += 1
             
@@ -155,11 +171,11 @@ class TestInterval():
 
         # if i % 2 == 0:
         if(t > 0):
-            print('tested video: ', self.videoFile, ', avg sumScore = ', sumScore/t)
+            # print('tested video: ', self.videoFile, ', avg sumScore = ', sumScore/t)
             return sumScore/t, confusion
         else:
-            print('ERROR: something went wrong while processing video: ', self.videoFile)
-            return 0, []
+            # print('ERROR: something went wrong while processing video: ', self.videoFile)
+            return -1, []
             
 
 

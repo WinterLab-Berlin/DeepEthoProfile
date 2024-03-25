@@ -83,22 +83,22 @@ class EthoCNN(nn.Module):
         #deprecated, not used anymore
         self.noPosFeatures = 0 #24 #32 #28
 
-        self.fc_size = 4096
+        self.fc_size = 2048
         self.cf_s = 8
-        self.cf_n = 256
+        self.cf_n = 512
         
         self.bn1 = nn.BatchNorm2d(11, track_running_stats=False)
-        self.c11 = nn.Conv2d(11, 64, (11, 1), padding=(5,0), stride=2)
-        self.c12 = nn.Conv2d(11, 64, (1, 11), padding=(0,5), stride=2)
-        self.c13 = nn.Conv2d(11, 64, (7, 3), padding=(3,1), stride=2)
-        self.c14 = nn.Conv2d(11, 64, (3, 7), padding=(1,3), stride=2)
+        self.c11 = nn.Conv2d(11, 32, (15, 3), padding=(7,1), stride=2)
+        self.c12 = nn.Conv2d(11, 32, (3, 15), padding=(1,7), stride=2)
+        self.c13 = nn.Conv2d(11, 32, (9, 5), padding=(4,2), stride=2)
+        self.c14 = nn.Conv2d(11, 32, (5, 9), padding=(2,4), stride=2)
         
         #deprecated, not used anymore
-        self.bn2 = nn.BatchNorm2d(256, track_running_stats=False)
+        # self.bn2 = nn.BatchNorm2d(128, track_running_stats=False)
         
-        self.c2 = nn.Conv2d(256, 384, 7, stride=2) # need to compromise for the mem
-        self.c3 = nn.Conv2d(384, 512, 5)
-        self.c4 = nn.Conv2d(512, self.cf_n, 3)
+        self.c2 = nn.Conv2d(128, 256, 7, stride=2) # need to compromise for the mem
+        self.c3 = nn.Conv2d(256, 384, 5)
+        self.c4 = nn.Conv2d(384, self.cf_n, 3)
 
         self.dropout = nn.Dropout(0.5)
         

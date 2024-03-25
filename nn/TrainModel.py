@@ -23,7 +23,7 @@ from TrainInterval import TrainInterval
 from Logger import Logger
 from TestModel import TestModel
 
-noClasses = 10
+noClasses = 8
 
 class TrainModel():
     '''
@@ -51,22 +51,23 @@ class TrainModel():
     #: simple logger used mostly for debugging
     logger: Logger
     
-    def __init__(self, noClasses, log):
+    def __init__(self, noClasses, log, modelPath = None):
         print('init TrainModel')
         #TODO: init model 
         self.model = None
         self.trainIntervals = []
         
         self.running = False
+        self.loadedEpoch = 0
         
         self.noClasses = noClasses
-        self.initModel()
+        self.initModel(modelPath)
         
         self.stagnating = 0
         
         self.logger = log
         
-    def initModel(self):
+    def initModel(self, modelPath = None):
         '''
         Initializes the :data:`model`, the :data:`optimizer` and the :data:`criterion`.
         
@@ -74,10 +75,23 @@ class TrainModel():
 
         '''
         self.model = EthoCNN(self.noClasses)
-        self.model.train()       
+        #self.model.train()       
         # optimizer = torch.optim.Adam(model.parameters(), lr=0.07)
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr = 1e-2)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr = 0.02)#, weight_decay = 0.0001) #, momentum=0.9
         self.criterion = torch.nn.CrossEntropyLoss()
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+        
+        if(modelPath is not None):
+            print('load full model')
+            checkpoint = torch.load(modelPath)
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.loadedEpoch = checkpoint['epoch'] + 1
+            self.criterion = checkpoint['loss']
+            self.scheduler = checkpoint['scheduler']
+            # print('loadedEpoch = ', self.loadedEpoch)
+        
+        self.model.train()       
         
         if torch.cuda.is_available():
             self.model = self.model.cuda()
@@ -99,7 +113,7 @@ class TrainModel():
         self.trainIntervals.append(newTrainInterval)
         
         
-    def trainEpoch(self):
+    def trainEpoch(self, epoch):
         '''
         Train an epoch. 
         
@@ -122,26 +136,48 @@ class TrainModel():
         if(lt < 10):
             print('too few training videos, skip')
             return 0
+        else:
+            print('train epoch {} using {} intervals'.format(epoch + self.loadedEpoch, lt))
+        
+        ii = 0
         for i in self.trainIntervals:
-
+            ii += 1
             if(self.running):
-                cost, annSet, acc, cc = i.train()
-
-                tc = tc + cost
-                ti = ti + 1
-                ta += acc
-                annTotalSet = annTotalSet + annSet
-                confusion += cc
-
-                if(ti%10 == 0):
-                    print(' = step {}, cost={}, avg acc={}'.format(ti, tc/ti, ta/ti))
+                cost, annSet, acc, cc = i.train(self.model, self.optimizer, self.criterion, self.logger, epoch + self.loadedEpoch)
+                
+                if(np.isnan(cost)):
+                    print('!!! !!! cost is NaN! stopping')
+                    self.running = False
+                    break
+                
+                if(cost > 0):
+                    tc = tc + cost
+                    ti += 1
+                    ta += acc
+                    annTotalSet = annTotalSet + annSet
+                    confusion += cc
+    
+                    if(ti%100 == 0):
+                        print(' = interval {}, cost={}, avg acc={}, last acc = {}'.format(ti, tc/ti, ta/ti, acc))
+                        print('annTotalSet = ', np.uint32(annTotalSet))
+                # else:
+                    # print(' ! ! ! ! train interval failed, cost = ', cost)
+                    
             else:
+                print('== running == False !!!')
                 break
-        print(' = = = for this full step, annTotalSet = ', np.uint32(annTotalSet))
-        print('train acc so far (with dropout) = {}'.format(ta / ti))
+            
+        if(ti > 0):
+            print('annTotalSet = ', np.uint32(annTotalSet))
+            print(' = = = train acc so far (with dropout) = {}'.format(ta / ti))
+        else:
+            print('no intervals trained')
+        
         with np.printoptions(suppress=True):
             print('confusion: \n', confusion)
             
+        self.scheduler.step()
+        print(' run scheduler at the end of an EPOCH, last computed lr = {}'.format(self.scheduler.get_last_lr()))
 
         if(ti > 0):
            return tc/ti
@@ -162,19 +198,20 @@ class TrainModel():
         self.running = True
         minCost = -1
         self.stagnating = 0
+        i = 0
         
         # shuffle(self.trainIntervals)
         
         for i in range(epochs):
-            print('train step ', i)
+            print('train step ', i + self.loadedEpoch)
             if(self.running):
                 shuffle(self.trainIntervals)
                 
-                avgCost = self.trainEpoch()
+                avgCost = self.trainEpoch(i)
                 print('FULL STEP! avg cost is: ', avgCost)
                 
-                if(i > 0):
-                    self.saveModel('step_{}.model'.format(i))
+                if(i + self.loadedEpoch > 0):
+                    self.saveModel('step_{}.model'.format(i + self.loadedEpoch))
                 if(minCost <= 0):
                     minCost = avgCost
                 else:
@@ -189,9 +226,10 @@ class TrainModel():
                             # print('updated minCost because of videos (possibly) removed, previously={}'.format(minCost))
                             # minCost = avgCost
                         else:
-                            print('cost grew/stagnated, stopping at {}'.format(minCost))
-                            self.running = False
+                            print('cost grew/stagnated, NOT stopping at {}'.format(minCost))
+                            # self.running = False
             else:
+                print(' - - running == False -> stop Train')
                 break
             
             
@@ -258,19 +296,29 @@ if __name__ == "__main__":
     
     log = Logger('train.log')
 
+    modelPath = None
+    if (len(sys.argv) > 3):
+        modelPath = sys.argv[3]
     # modelPath = './mouse.modular.model'
     
-    epochs = 13
+    epochs = 18
     
     #train
-    trainModel = TrainModel(noClasses, log)
+    trainModel = TrainModel(noClasses, log, modelPath)
     
-    for videoFile in glob.glob(trainVideoPath + '*.avi'):
-        annFile = videoFile.replace('.avi', '_ann.csv')
+    
+    for videoFile in glob.glob(trainVideoPath + '*_pad.mpg'):
+        annFile = videoFile.replace('_pad.mpg', '.csv')
         if(path.exists(annFile)): 
             trainModel.addTrainInterval(videoFile, annFile)
         else:
             print('missing data for file ', videoFile)
+    # for videoFile in glob.glob(trainVideoPath + '*.avi'):
+    #     annFile = videoFile.replace('.avi', '_ann.csv')
+    #     if(path.exists(annFile)): 
+    #         trainModel.addTrainInterval(videoFile, annFile)
+    #     else:
+    #         print('missing data for file ', videoFile)
 
 
     trainModel.train(epochs)
@@ -292,14 +340,14 @@ if __name__ == "__main__":
         print('test annotations folder: ', annFolder)
         
         
-        for x in range(4, epochs):#epochs-10):
+        for x in range(5, epochs):#epochs-10):
             # modelName = 'mouse_v2.model' 
             modelName = 'step_{}.model'.format(x)#epochs - x)
             print(' - - - testing model: {} - - - '.format( modelName))
             testModel = TestModel(noClasses, modelName, log)
             
-            for crtVideo in glob.glob(dataFolder + '*.avi'):
-                crtAnn = crtVideo.replace('.avi', '.csv')
+            for crtVideo in glob.glob(dataFolder + '*_pad.mpg'):
+                crtAnn = crtVideo.replace('_pad.mpg', '.csv')
                 if(path.exists(crtAnn)): 
                     testModel.addTestInterval(crtVideo, crtAnn)
                 else:
