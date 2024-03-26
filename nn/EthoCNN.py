@@ -83,7 +83,7 @@ class EthoCNN(nn.Module):
         #deprecated, not used anymore
         self.noPosFeatures = 0 #24 #32 #28
 
-        self.fc_size = 2048
+        self.fc_size = 4096
         self.cf_s = 8
         self.cf_n = 512
         
@@ -98,6 +98,7 @@ class EthoCNN(nn.Module):
         
         self.c2 = nn.Conv2d(128, 256, 7, stride=2) # need to compromise for the mem
         self.c3 = nn.Conv2d(256, 384, 5)
+        # self.c32 = nn.Conv2d(384, 512, 3)
         self.c4 = nn.Conv2d(384, self.cf_n, 3)
 
         self.dropout = nn.Dropout(0.5)
@@ -145,6 +146,7 @@ class EthoCNN(nn.Module):
         # print('c2 & pool: {}'.format(x.shape))
 
         x = torch.relu(self.c3(x))
+        # x = torch.relu(self.c32(x))
         # x = torch.max_pool2d(x, 3, 2)
         # print('c3: {}'.format(x.shape))
 
