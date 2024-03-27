@@ -301,7 +301,7 @@ if __name__ == "__main__":
         modelPath = sys.argv[3]
     # modelPath = './mouse.modular.model'
     
-    epochs = 18
+    epochs = 15
     
     #train
     trainModel = TrainModel(noClasses, log, modelPath)
@@ -340,7 +340,7 @@ if __name__ == "__main__":
         print('test annotations folder: ', annFolder)
         
         
-        for x in range(5, epochs):#epochs-10):
+        for x in range(6, epochs):#epochs-10):
             # modelName = 'mouse_v2.model' 
             modelName = 'step_{}.model'.format(x)#epochs - x)
             print(' - - - testing model: {} - - - '.format( modelName))

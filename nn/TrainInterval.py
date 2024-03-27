@@ -74,8 +74,8 @@ class TrainInterval():
         '''
         # print('train video: {}, {}, {}'.format(self.videoFile, self.posFile, self.annFile))
         mult = 1
-        if(epoch > 0):
-            mult += (epoch)/80 #100, 50, 70
+        if(epoch > 1):
+            mult += (epoch)/100
         skip = False
         #something very special for the MIT clipped db
         crtVid = self.videoFile
@@ -84,30 +84,30 @@ class TrainInterval():
             #     skip = True
             pass
         elif(crtVid.find('_e_') > 0 or crtVid.find('_eat_') > 0):
-            if(random() < 0.65 * mult): #0.55 0.6
+            if(random() < 0.55 * mult):
                 skip = True
         elif(crtVid.find('_g_') > 0 or crtVid.find('_groom_') > 0):
-            if(random() < 0.85 * mult): #0.82
+            if(random() < 0.82 * mult):
                 skip = True
         elif(crtVid.find('_gb_') > 0 or crtVid.find('_groomback_') > 0):
-            if(random() < 0.75 * mult): #0.75
+            if(random() < 0.75 * mult):
                 skip = True
         elif(crtVid.find('_ha_') > 0 or crtVid.find('_hang_') > 0):
-            if(random() < 0.7 * mult): #0.65
+            if(random() < 0.65 * mult):
                 skip = True
         elif(crtVid.find('_he_') > 0 or crtVid.find('_head_') > 0 ):
-            if(random() < 0.1 * mult): #0.02
-                skip = True
+            # if(random() < 0.01 * mult):
+            #     skip = True
             pass
         elif(crtVid.find('_r_') > 0 or crtVid.find('_rear_') > 0):
-            if(random() < 0.4 * mult): #0.28 0.35
+            if(random() < 0.28 * mult):
                 skip = True
         elif(crtVid.find('_rs_') > 0 or crtVid.find('_rest_') > 0):
-            if(random() < 0.8 * mult): #0.78
+            if(random() < 0.78 * mult):
                 skip = True
         elif(crtVid.find('_w_') > 0 or crtVid.find('_walk_') > 0):
-            if(random() < 0.05 * mult): #0.01
-                skip = True
+            # if(random() < 0.01 * mult):
+            #     skip = True
             pass
         
         
