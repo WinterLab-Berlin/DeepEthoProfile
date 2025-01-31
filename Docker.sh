@@ -1,7 +1,7 @@
 # creates a Docker image that will perform the processing
 
 # as the NN model file is not present on the GitHub repository, it will be downloaded if it is not present
-model_file=./nn/mouse_v2.model
+model_file=./nn/mouse_v5.model
 
 if test -f "$model_file"; then
 	echo "$model_file already present"
