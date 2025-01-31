@@ -92,6 +92,7 @@ class ProcComm:
             elif(fileName.endswith('avi')):
                 # inputVideo = fileName#.replace('.avi', '_c.avi')
                 outputFile = inputVideo.replace('.avi', '_results_v5.csv')
+                logger.log('output file is ' + outputFile)
             else:
                 try:
                     self.sendMessage('invalid video file {}'.format(fileName))
