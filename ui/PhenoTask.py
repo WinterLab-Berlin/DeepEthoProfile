@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """
 
 from os import path

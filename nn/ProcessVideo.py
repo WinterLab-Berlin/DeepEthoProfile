@@ -200,7 +200,7 @@ if __name__ == "__main__":
         print('not enough parameters. please specify the location of the videos')
         exit(1)
 
-    modelPath = '2412_split_90_10_e25.model'
+    modelPath = './mouse_v5.model' #'2412_split_90_10_e25.model'
 
     logPath = videoDir + logFile
 

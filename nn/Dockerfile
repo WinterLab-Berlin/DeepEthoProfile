@@ -9,6 +9,10 @@ ADD ProcComm.py /home/nn
 ADD Logger.py /home/nn
 ADD ProcessVideo.py /home/nn
 ADD StackFrames.py /home/nn
+ADD FrameSelect.py /home/nn
+
+# Enable venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 ENTRYPOINT python3 ProcComm.py
 

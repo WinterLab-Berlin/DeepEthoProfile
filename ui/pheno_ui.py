@@ -6,7 +6,7 @@ DeepEtoProfile entry point: pheno_ui.py
 """
 
 """ 
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """ 
 
 __version__ = 0.1

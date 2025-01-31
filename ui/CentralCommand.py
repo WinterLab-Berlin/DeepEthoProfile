@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """
 
 import os.path
@@ -124,7 +124,7 @@ class CentralCommand:
         print('start processing NN docker image on port: ', crtPort)
 
         client = docker.from_env()
-        client.containers.run("ethoprofiler_nn_av", detach=True, ports={2000: crtPort}, remove=True,
+        client.containers.run('ethoprofiler_nn_av', detach=True, ports={2000: crtPort}, remove=True,
                               device_requests=[docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])],        #runtime="nvidia",
                               volumes={taskDir: {'bind': '/mnt/data', 'mode': 'rw'}})
 
@@ -264,8 +264,4 @@ class CentralCommand:
 
 
 if __name__ == '__main__':
-    cc = CentralCommand(None)
-
-    tTask = PhenoTask(0, '/home/andrei/Videos/test/04_20180815_1200.mkv')
-#    tTask = PhenoTask(0, '/home/andrei/Videos/test/06_20180419_0000.mkv')
-    cc.computeBg(0, tTask)
+    pass

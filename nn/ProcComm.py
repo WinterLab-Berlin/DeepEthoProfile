@@ -78,20 +78,24 @@ class ProcComm:
             # videoFilePath = path.join(mountDir, fileName)
             # inputVideo = ''
             inputVideo = path.join(mountDir, fileName)
-            logPath = ''
+            logPath = inputVideo + '.log'
             outputFile = ''
+
+            #creates a logger that will be used by the processing
+            logger = Logger(logPath)
+            logger.log('init logger for video ' + inputVideo)
 
             if(fileName.endswith('mkv')):
                 # inputVideo = fileName #.replace('.mkv', '.avi')
-                logPath = inputVideo.replace('.mkv', '_nn.log')
-                outputFile = inputVideo.replace('.mkv', '_results_v4.csv')
+                outputFile = inputVideo.replace('.mkv', '_results_v5.csv')
+                logger.log('output file is ' + outputFile)
             elif(fileName.endswith('avi')):
                 # inputVideo = fileName#.replace('.avi', '_c.avi')
-                logPath = inputVideo.replace('.avi', '_nn.log')
-                outputFile = inputVideo.replace('.avi', '_results_v4.csv')
+                outputFile = inputVideo.replace('.avi', '_results_v5.csv')
             else:
                 try:
                     self.sendMessage('invalid video file {}'.format(fileName))
+                    logger.log('invalid video file {}'.format(fileName))
                 except RuntimeError:
                     print('error sending message')
                     
@@ -99,9 +103,6 @@ class ProcComm:
                 
                 return
 
-            #creates a logger that will be used by the processing
-            logger = Logger(logPath)
-            
             try:
                 self.sendMessage('processing file {}'.format(inputVideo))
                 self.callProc(inputVideo, outputFile, logger)
@@ -126,7 +127,7 @@ class ProcComm:
         '''
 
         logger.log('= process video {} with output {} \n'.format(videoFile, outputFile))
-        proc = ProcessVideo('./mouse_v2.model', 10, videoFile, outputFile)
+        proc = ProcessVideo('./mouse_v5.model', 8, videoFile, outputFile)
         
         try:
             crtStep = 0

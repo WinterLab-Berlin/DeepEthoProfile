@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: Andrei Istudor
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """
 
 from threading import Thread, Lock
