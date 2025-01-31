@@ -4,7 +4,7 @@
 Defines the CNN that performs the classification
 
 
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """
 import numpy as np
 import torch
@@ -79,52 +79,37 @@ class EthoCNN(nn.Module):
         super(EthoCNN, self).__init__()
         
         self.noClasses = noClasses
-        
-        #deprecated, not used anymore
-        self.noPosFeatures = 0 #24 #32 #28
 
-        self.fc_size = 4096
-        self.cf_s = 8
+        self.fc_size = 2048
+        self.cf_s = 4
         self.cf_n = 256
         
-        self.bn1 = nn.BatchNorm2d(11, track_running_stats=False)
-        self.c11 = nn.Conv2d(11, 64, (11, 1), padding=(5,0), stride=2)
-        self.c12 = nn.Conv2d(11, 64, (1, 11), padding=(0,5), stride=2)
-        self.c13 = nn.Conv2d(11, 64, (7, 3), padding=(3,1), stride=2)
-        self.c14 = nn.Conv2d(11, 64, (3, 7), padding=(1,3), stride=2)
+        self.bn1 = nn.BatchNorm2d(11)
         
-        #deprecated, not used anymore
-        self.bn2 = nn.BatchNorm2d(256, track_running_stats=False)
+        self.c11 = nn.Conv2d(11, 32, (11, 1), padding=(5,0), stride=2)
+        self.c12 = nn.Conv2d(11, 32, (1, 11), padding=(0,5), stride=2)
+        self.c13 = nn.Conv2d(11, 32, (7, 3), padding=(3,1), stride=2)
+        self.c14 = nn.Conv2d(11, 32, (3, 7), padding=(1,3), stride=2)
         
-        self.c2 = nn.Conv2d(256, 384, 7, stride=2) # need to compromise for the mem
-        self.c3 = nn.Conv2d(384, 512, 5)
+        self.bn2 = nn.BatchNorm2d(128) #, track_running_stats=False)
+        self.c2 = nn.Conv2d(128, 256, 5) # need to compromise for the mem
+        self.bn3 = nn.BatchNorm2d(256)
+        self.c3 = nn.Conv2d(256, 384, 3)
+        # self.bn4 = nn.BatchNorm2d(512)
+        self.c32 = nn.Conv2d(384, 512, 3)
         self.c4 = nn.Conv2d(512, self.cf_n, 3)
+        # self.bn5 = nn.BatchNorm2d(self.cf_n)
 
         self.dropout = nn.Dropout(0.5)
         
         #2 fully connected layers to transform the output of the convolution layers to the final output
         self.fc1 = nn.Linear(self.cf_s * self.cf_s * self.cf_n, self.fc_size)
+        self.fc12 = nn.Linear(self.fc_size, self.fc_size)
         self.fc2 = nn.Linear(self.fc_size, self.noClasses) #
 
 
-    def forward(self, x):
-        '''
-        Implements the architecture of the CNN as:
-            
-        bn1-[c11, c12, c13, c14]-P(3,2)-c2-P(3,2)-c3-c4-dropout-fc1-dropout-fc2
-        
-        After an initial batch normalization, the 4 convolutions of the first layer are applied to the normed input.
-        The results are stacked and then 2D max pooling is applied on the resulting tensor.
-        Another 2D max pooling is applied after the second layer convolution.
-        Each convolution layer is followed by a Rectified Linear Unit (ReLU).
-        A Dropout step that randomly zeroes some of the elements of the input tensor during training is applied before each fully connected layer.
-        
-        :param x: set of images that will be processed in parallel
-        :type x: array
-        :return: the log_softmax value of the classification results for each input image in :data:`x`
-        :rtype: array
 
-        '''
+    def forward(self, x):
         
         x = self.bn1(x)
         x1 = torch.relu(self.c11(x))
@@ -132,36 +117,36 @@ class EthoCNN(nn.Module):
         x3 = torch.relu(self.c13(x))
         x4 = torch.relu(self.c14(x))
         
-        # print('input filter: {}'.format(x1.shape))
         x = torch.cat((x1, x3, x4, x2), dim=1) #x1,,x2
-        # print('input filter stack: {}'.format(x.shape))
         x = torch.max_pool2d(x, 3, 2)
-        # print('input filter stack & pool: {}'.format(x.shape))
         
-        # x = self.bn2(x)
+        x = self.bn2(x)
         x = torch.relu(self.c2(x))
-        # print('c2: {}'.format(x.shape))
         x = torch.max_pool2d(x, 3, 2)
-        # print('c2 & pool: {}'.format(x.shape))
+        x = self.bn3(x)
 
         x = torch.relu(self.c3(x))
+        x = torch.max_pool2d(x, 3, 2)
+        x = torch.relu(self.c32(x))
         # x = torch.max_pool2d(x, 3, 2)
-        # print('c3: {}'.format(x.shape))
+        # x = self.bn4(x)
+        # x = torch.max_pool2d(x, 3, 2)
 
         x = torch.relu(self.c4(x))
-        # x = torch.max_pool2d(x, 3, 2)
-        # print('c4: {}'.format(x.shape))
+        x = torch.max_pool2d(x, 3, 2)
+        # x = self.bn5(x)
 
     
         # print(x.shape)
         #flatten the output for each image
         x = x.view(-1, self.cf_s * self.cf_s * self.cf_n)  # batch_size x 8*8*128
-        x = self.dropout(x)
         #apply 2 fully connected layers with dropout
+        x = self.dropout(x)
         x = torch.relu(self.fc1(x)) 
         x = self.dropout(x)
+        x = torch.relu(self.fc12(x)) 
         x = self.fc2(x)
         # x = torch.relu(x)
     
-        return torch.log_softmax(x, dim=1)
+        return x
 

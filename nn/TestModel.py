@@ -66,22 +66,52 @@ class TestModel:
         ta = 0
         ti = 0
         confusion = np.zeros((self.noClasses, self.noClasses))
+        
+        
         with torch.no_grad():
             # print('test {} intervals'.format(len(self.testIntervals)))
-            for i in self.testIntervals:
+            for crtInt in self.testIntervals:
+                annList = np.zeros(self.noClasses, dtype=int)
+                predList = np.zeros(self.noClasses, dtype=int)
                 if(self.running):
-                    ca, cc = i.test()
+                    ca, cc = crtInt.test()
                     if(ca >= 0):
                         ta = ta + ca
                         confusion += cc
                         ti = ti + 1
+                        
+                        # tpC = 0
+                        # taC = 0
+                        # for i in range(len(confusion)):
+                        #     for j in range(len(confusion[i])):
+                        #         annList[i] += cc[i, j]
+                        #         predList[j] += cc[i, j]
+                        #         taC += cc[i, j]
+                        #         if(i == j):
+                        #             tpC += cc[i, j]
+                                    
+                        # print(' test video {} - - - ACC = {}'.format(crtInt.videoFile, tpC/taC))
+                        # with np.printoptions(suppress=True):
+                        #     print('annotations: \n', annList)
+                        #     print('predictions: \n', predList)
+                        #         print('predictions: \t', predList)
                 else:
                     break
-    
-                if(ti%10==1):
-                    print('cummulated test result at step {} is {} '.format(ti, ta/ti))
+                
+                if(ti%10 == 0):
+                    tpC = 0
+                    taC = 0
+                    for i in range(len(confusion)):
+                        for j in range(len(confusion[i])):
+                            taC += confusion[i, j]
+                            if(i == j):
+                                tpC += confusion[i, j]
+                    # print(' = interval {}, cost={}, avg acc={}, last acc = {}'.format(ti, tc/ti, ta/ti, acc))
+                    print(' = interval {} - - - ACC = {:.2%}'.format(ti, tpC/taC))
                     # with np.printoptions(suppress=True):
                     #     print('confusion: \n', confusion)
+
+
         print('final test result = ', ta/ti)
         with np.printoptions(suppress=True):
             print('confusion: \n', confusion)

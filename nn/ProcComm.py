@@ -200,11 +200,9 @@ if __name__ == '__main__':
  #   file = argv[1]
 #    port = 2000
     pc = ProcComm()
-    #cb.callPreProc('short.mkv', '/home/andrei/Videos/test')
     pc.start_sockServer()
     # pc.callProc(file)
 
 
-#"/home/andrei/Documents/background/preprocess/bin/preprocess"
 
 #$PROCESS --computeBG 01_20180815_0000.mkv --bgFrames 50

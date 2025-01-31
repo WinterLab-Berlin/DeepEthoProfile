@@ -3,7 +3,7 @@
 """
 the TestInterval class
 
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """
 import numpy as np
 from EthoCNN import EthoCNN#, getTensors
@@ -11,9 +11,10 @@ import torch
 from sklearn.metrics import accuracy_score
 
 # from DataReader import DataReader
-from DataReaderAV import DataReaderAV, mapAnn2
-from StackFrames import getTensors, getTestTensors
+from DataReaderAV import DataReaderAV#, mapAnn2
+from StackFrames import  getTestTensors
 from Logger import Logger
+from FrameSelect import FrameSelect
 
 
 class TestInterval():
@@ -73,7 +74,7 @@ class TestInterval():
         # print('test interval')
         model = EthoCNN(self.noClasses)
             
-        model.load_state_dict(torch.load(self.modelPath))
+        model.load_state_dict(torch.load(self.modelPath, weights_only=True))
 
         if torch.cuda.is_available():
            model.to(torch.device('cuda'))
@@ -82,84 +83,84 @@ class TestInterval():
             
         sumScore = 0
     
-        reader = DataReaderAV(self.logger, self.videoFile, self.annFile) 
-        if(reader.open() is False):
-            print('cannot open video ', self.videoFile)
-            return -1
+        # reader = DataReaderAV(self.logger, self.videoFile, self.annFile)
+        # if(reader.open() is False):
+        #     print('TI - cannot open video: ', self.videoFile)
+        #     return -1
         confusion = np.zeros((self.noClasses, self.noClasses))
         t = 0        
+        # step = 5
+        # print('opened ann ', self.annFile)
         #model.resetHidden()
+        setSize = 16
         with torch.no_grad():
-            for dataSegment in reader.readFrames(self.segSize):
-                if(len(dataSegment) < 16):
-                    break
-                
-                data = np.array(dataSegment, dtype=object)
-                x = data[:, 2]
-                y = data[:, 3].tolist()
-
-                # x = data[:][2]
-                # y = data[:][3]
-                
-                xt = getTestTensors(x)
-
-            # Forward pass: Compute predicted y by passing x to the model
-                crt_y = model(xt)
-                npPred = crt_y.data.cpu().numpy()
-            
-                final_pred = np.argmax(npPred, axis=1)
-            
-                predex = np.zeros(len(dataSegment))
-                bins = int((len(dataSegment)-5)/6)
-                
-                # print('bins={}, t={}'.format(bins, t))
-                
-                #map results
-                for ia in range(len(final_pred)):
-                    final_pred[ia] = mapAnn(final_pred[ia])
-                
-                predex[0] = final_pred[0]
-                predex[1] = final_pred[0]
-                predex[2] = final_pred[0]
-                for i in range(bins):
-                    ii = i * 6 + 5
-                    predex[ii-3] = final_pred[i]
-                    predex[ii-2] = final_pred[i]
-                    predex[ii-1] = final_pred[i]
-                    predex[ii] = final_pred[i]
-                    predex[ii+1] = final_pred[i]
-                    predex[ii+2] = final_pred[i]
-                    predex[ii+3] = final_pred[i]
-                predex[-3] = final_pred[-1]
-                predex[-2] = final_pred[-1]
-                predex[-1] = final_pred[-1]
+            fs = FrameSelect(self.logger, self.videoFile, self.annFile, 0)
+            if(fs.startReader()):
+                while(True):
+                    x, y, count = fs.getTestSet(setSize)
+                    if(count < 1):
+                        print('no enough images left in videofile ', self.videoFile)
+                        break
                     
-                # ann = yt.data.cpu().numpy()
-                score = accuracy_score(y, predex)
-
-                for i in range(len(y)):
-                    confusion[y[i], int(predex[i])] += 1
-            
-                sumScore = sumScore + score
-            
-                t = t + 1
-                # resetModel = False
+                    xt = torch.from_numpy(x).float().cuda()
+                    # bins = len(xt)
+                    # print(bins)
+                    # print(y.shape)
+                    # print('y:', y)
+                    # if(bins < 1):
+                    
+                    # print('frames={}, bins={}, t={}'.format(len(x), bins, t))
+                    
+                # Forward pass: Compute predicted y by passing x to the model
+                    crt_y = model(xt)
+                    npPred = crt_y.data.cpu().numpy()
                 
-        reader.close()
-        del reader
+                    final_pred = np.argmax(npPred, axis=1)
+
+                    predex = np.zeros(count*11, dtype=int)
+                    yex = y[:count].flatten()
+
+                    for i in range(count):
+                        ii = i * 11 + 5
+
+                        predex[ii-5] = final_pred[i]
+                        predex[ii-4] = final_pred[i]
+                        predex[ii-3] = final_pred[i]
+                        predex[ii-2] = final_pred[i]
+                        predex[ii-1] = final_pred[i]
+                        predex[ii] = final_pred[i]
+                        predex[ii+1] = final_pred[i]
+                        predex[ii+2] = final_pred[i]
+                        predex[ii+3] = final_pred[i]
+                        predex[ii+4] = final_pred[i]
+                        predex[ii+5] = final_pred[i]
+
+                    score = accuracy_score(yex, predex)
+                    for i in range(len(yex)):
+                        confusion[yex[i], int(predex[i])] += 1
+                
+                    sumScore = sumScore + score
+                
+                    t = t + 1
+
+                    if(count < setSize):
+                        # print('finished video')
+                        break
+                
+            fs.stopReader()
+            del fs
         del model
             
         import gc
         gc.collect()
         torch.cuda.empty_cache()
 
-        # if i % 2 == 0:
         if(t > 0):
-            print('tested video: ', self.videoFile, ', avg sumScore = ', sumScore/t)
+            # print('tested video: ', self.videoFile, ', avg sumScore = ', sumScore/t)
             return sumScore/t, confusion
         else:
-            print('ERROR: something went wrong while processing video: ', self.videoFile)
-            return 0, []
+            # print('ERROR: something went wrong while processing video: ', self.videoFile)
+            return -1, []
             
 
 

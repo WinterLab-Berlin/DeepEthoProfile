@@ -4,8 +4,11 @@
 The TrainModel class 
 
 
-@author: Andrei Istudor     andrei.istudor@hu-berlin.de
+@author: Andrei Istudor     andrei.istudor@gmail.com
 """
+import gc
+import tracemalloc
+
 import torch
 import torch.nn
 import torch.optim
@@ -16,14 +19,16 @@ import numpy as np
 from os import path
 # from pathlib import Path
 import glob
-from random import shuffle
+from random import shuffle, random
+from sklearn.metrics import accuracy_score
+
 
 from EthoCNN import EthoCNN
 from TrainInterval import TrainInterval
 from Logger import Logger
 from TestModel import TestModel
 
-noClasses = 10
+noClasses = 8
 
 class TrainModel():
     '''
@@ -51,38 +56,70 @@ class TrainModel():
     #: simple logger used mostly for debugging
     logger: Logger
     
-    def __init__(self, noClasses, log):
+    def __init__(self, noClasses, log, modelPath = None):
         print('init TrainModel')
         #TODO: init model 
         self.model = None
         self.trainIntervals = []
         
         self.running = False
+        self.loadedEpoch = 0
         
         self.noClasses = noClasses
-        self.initModel()
+        self.initModel(modelPath)
         
         self.stagnating = 0
         
         self.logger = log
         
-    def initModel(self):
+    def initModel(self, modelPath = None):
         '''
         Initializes the :data:`model`, the :data:`optimizer` and the :data:`criterion`.
         
         If cuda is available, they will all be transfered to the GPU memory.
 
         '''
-        self.model = EthoCNN(self.noClasses)
-        self.model.train()       
-        # optimizer = torch.optim.Adam(model.parameters(), lr=0.07)
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr = 1e-2)
-        self.criterion = torch.nn.CrossEntropyLoss()
         
-        if torch.cuda.is_available():
-            self.model = self.model.cuda()
-            self.criterion = self.criterion.cuda()
+        self.model = EthoCNN(self.noClasses)
+        
+        if(modelPath is None):
+           # the weights apparently apply only for the batch, which is not useful for the current training data
+            # cWeight = torch.tensor  ([2.55, 1.14, 0.72, 1.25, 0.69, 0.89, 0.78, 1.5]).cuda()
+            #self.model.train()       
+            # optimizer = torch.optim.Adam(model.parameters(), lr=0.07)
+            self.criterion = torch.nn.CrossEntropyLoss() # weight=cWeight)
 
+            if torch.cuda.is_available():
+                print('cuda')
+                self.model = self.model.cuda()
+                self.criterion = self.criterion.cuda()
+                
+            self.optimizer = torch.optim.SGD(self.model.parameters(), lr = 0.03)#, momentum=0.5)#, weight_decay = 0.0001) #, momentum=0.9
+            self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
+        else:
+            print('load full model')
+            checkpoint = torch.load(modelPath, weights_only=False)
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.criterion = checkpoint['loss']
+            
+            if torch.cuda.is_available():
+                print('cuda')
+                self.model = self.model.cuda()
+                self.criterion = self.criterion.cuda()
+                
+            self.optimizer = torch.optim.SGD(self.model.parameters(), lr = 0.03, momentum=0.5)
+            self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
+            
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.loadedEpoch = checkpoint['epoch'] + 1
+            # self.scheduler = checkpoint['scheduler']
+            # print('loadedEpoch = ', self.loadedEpoch)
+        #     self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
+        # else:
+        #     self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.98)
+        
+        self.model.train()       
+        
 
     def addTrainInterval(self, videoFile, annFile): 
         '''
@@ -99,62 +136,300 @@ class TrainModel():
         self.trainIntervals.append(newTrainInterval)
         
         
-    def trainEpoch(self):
-        '''
-        Train an epoch. 
-        
-        Calls the :func:`TrainInterval.TrainInterval.train` for all the items added in :data:`trainIntervals`.
-        The average cost, the used target annotaions, the training accuracy score and the corresponding confusion matrix
-        are accumulated and displayed.
-        
-        :return: average cost
-        :rtype: float
+    def trainSet(self, imS, annS, count):
+        # xf = np.zeros(8)
+        # for xi in annS:
+        #     xf[xi] += 1
+        # # if(min(xf) < 1):
+        # print('train set: ', xf)
 
-        '''
-        ti = 0
-        tc = 0
-        ta = 0
+        xt = torch.from_numpy(imS[:count]).float().cuda()
+        yt = torch.from_numpy(annS[:count]).long().cuda()
+        # print(annS)
+        score = 0
         confusion = np.zeros((self.noClasses, self.noClasses))
-
-        annTotalSet = np.zeros(self.noClasses)
         
-        lt = len(self.trainIntervals)
-        if(lt < 10):
-            print('too few training videos, skip')
-            return 0
-        for i in self.trainIntervals:
 
-            if(self.running):
-                cost, annSet, acc, cc = i.train()
+        self.optimizer.zero_grad()
 
-                tc = tc + cost
-                ti = ti + 1
-                ta += acc
-                annTotalSet = annTotalSet + annSet
-                confusion += cc
+        # compute predicted annotations by passing the stacked images to the model
+        crt_y = self.model(xt) #, posT
+        
+        # Compute loss
+        loss = self.criterion(crt_y, yt)
+    
+        loss.backward()
+        self.optimizer.step()
+        
+        if(np.isnan(loss.item())):
+            print(' ! ! ! ! loss is NaN')
+        else:
+#debug/status data:
+            npPred = crt_y.data.cpu().numpy()
+            final_pred = np.argmax(npPred, axis=1)
+            ann = yt.data.cpu().numpy()
+            score = accuracy_score(ann, final_pred)
+            for i in range(len(ann)):
+                confusion[ann[i], final_pred[i]] += 1
 
-                if(ti%10 == 0):
-                    print(' = step {}, cost={}, avg acc={}'.format(ti, tc/ti, ta/ti))
-            else:
+        return loss.item(), score, confusion
+
+    def trainBuf(self, imBuff, setSize, stackSize):
+        loadMore = False
+        storedBuf = 0
+        for cb in range(self.noClasses - 1):
+            b = imBuff[cb+1]
+            s = len(b)
+            if (s == 0):
+                loadMore = True
                 break
-        print(' = = = for this full step, annTotalSet = ', np.uint32(annTotalSet))
-        print('train acc so far (with dropout) = {}'.format(ta / ti))
+            else:
+                storedBuf += s
+
+        if (loadMore is True):
+            # print('load more')
+            return False, 0, None, None, None, None
+
+        if (storedBuf < setSize):
+            # print('not enough images')
+            return False, 0, None, None, None, None
+
+        # Start to trace memory
+        tracemalloc.start()
+
+        outi = np.array(np.zeros((setSize, stackSize, 256, 256), dtype=np.float16))
+        outa = np.array(np.zeros(setSize, dtype=int))
+        # print('stored buffer = ', storedBuf)
+        selInt = []
+        for cb in range(self.noClasses):
+            shuffle(imBuff[cb])
+        selInt.append(imBuff[0].pop(0))
+        startA = 6 #randint(0, 7)
+        maxL = 0
+        for cb in range(self.noClasses - 1):
+            if(len(imBuff[cb + 1]) > maxL):
+                maxL = len(imBuff[cb + 1])
+                startA = cb
+
+        while (len(selInt) < setSize):
+            for cb in range(self.noClasses - 1):
+                crti = cb + startA
+                crti %= (self.noClasses - 1)
+                if (len(imBuff[crti + 1]) > 0):
+                    selInt.append(imBuff[crti + 1].pop(0))
+
+                if (len(selInt) == setSize):
+                    break
+
+        shuffle(selInt)
+
+        for ci in range(len(selInt)):
+            crtIm, crtAnn = selInt[ci]
+            outi[ci] = crtIm
+            outa[ci] = crtAnn
+
+        # print('train set')
+        crtLoss, crtScore, crtConfusion = self.trainSet(outi, outa, len(selInt))
+        if (np.isnan(crtLoss)):
+            print('loss is NaN')
+            # self.scheduler.step()
+            return False, 0, None, None, None, None
+        else:
+            annSet = np.zeros(self.noClasses)
+            for a in outa:
+                annSet[a] += 1
+
+            # selInt.clear()
+            del outi
+            del outa
+            # del selInt
+            gc.collect()
+            # Clear traces of memory blocks allocated by Python
+            # before moving to the next section.
+            tracemalloc.clear_traces()
+
+            return True, len(selInt), crtLoss, crtScore, crtConfusion, annSet
+
+    def trainNewEpoch(self, epoch, drinkBuffer):
+        confusion = np.zeros((self.noClasses, self.noClasses))
+        annTotalSet = np.zeros(self.noClasses)
+        status = []
+        started = []
+        stackSize = 11
+        setSize = 16
+        
+        for i in self.trainIntervals:
+            # i.startNew(self.logger)
+            status.append(True)
+            started.append(False)
+        
+        score = 0
+        loss = 0
+        confusion = np.zeros((self.noClasses, self.noClasses))
+        annSet = np.zeros(self.noClasses)
+        
+        i = 0
+        totalFrames = 0
+        totalTrains = 0
+
+        imBuff = []
+        for i in range(self.noClasses):
+            imBuff.append([])
+
+        previousDrink = len(drinkBuffer)
+        if(previousDrink > 0):
+            print('recover drink ', previousDrink)
+            for d in drinkBuffer:
+                imBuff[0].append(d)
+
+        stopping = False
+        hasDrink = 0
+
+        localIntervals = min(100, len(self.trainIntervals))
+        # crtFinished = status.count(False)
+        
+        while(status.count(True) > 4):
+            if(stopping):
+                print('stopping')
+                break
+            
+            for tii in range(localIntervals):
+                if(not started[tii]):
+                    self.trainIntervals[tii].startNew(self.logger)
+                    started[tii] = True
+
+                if(status[tii]):
+                    ti = self.trainIntervals[tii]
+                    imS, ann, finished = ti.getNextStackedImage(self.logger)
+                    if(finished):
+                        status[tii] = False
+                        # if(crtFinished < status.count(False)):
+                        if(localIntervals < len(self.trainIntervals)):
+                            # print('add interval after ', totalFrames, ', now = ', localIntervals, ', and finished = ', status.count(False))
+                            localIntervals += 1
+                        # else:
+                        #     if(status.count(True) < 20):
+                        #         stopping = True
+                        #         break
+                        # else:
+                        #     print('finished adding intervals {}, finished = {}'.format(localIntervals, status.count(False)))
+                    else:
+                        skipMore = 0.6
+
+                        if(ann in [6, 1] and random() < 0.22):
+                            continue
+                        if(status.count(True) < setSize):
+                            skipMore = 0.2
+                        if(ann in [6, 1 , 2, 4] and random() < skipMore):
+                            continue
+
+                        # if(ann != 0):
+                        #     tl = 0
+                        #     iz = 0
+                        #     for xx in range(len(imBuff) - 1):
+                        #         iz = len(imBuff[xx+1])
+                        #         if(iz == 0 and ann == xx+1):
+                        #             # print('found one missing ', ann)
+                        #             tl = 0
+                        #             break
+                        #         tl += iz
+                        #
+                        #     if(tl > 3000):
+                        #         print('memory almost full ', tl)
+                        #         continue
+
+                        imBuff[ann].append((imS, ann))
+
+                        tResult = True
+                        while(tResult and len(imBuff[0]) > 0):
+                            tResult, crtFrames, crtLoss, crtScore, crtConfusion, crtAnnSet = self.trainBuf(imBuff, setSize, stackSize)
+                            if(tResult is True):
+                                totalFrames += crtFrames
+                                totalTrains += 1
+                                loss += crtLoss
+                                score += crtScore
+                                confusion += crtConfusion
+                                annSet += crtAnnSet
+
+                                gc.collect()
+
+                                if (totalTrains % 50 == 0):
+                                    print(' = after {} images - - - score = {:.2%}, loss = {:.4}, annTotalSet = {}'.format(
+                                        totalFrames, score / totalTrains, loss / totalTrains, np.uint32(annSet)))
+                                    # tl = []
+                                    # for xx in range(len(imBuff)):
+                                    #     tl.append(len(imBuff[xx]))
+                                    # print('current stored set: {} with total = {}'.format(tl, sum(tl)))
+
+                                # tpC = 0
+                                # taC = 0
+                                # for i in range(len(confusion)):
+                                #     for j in range(len(confusion[i])):
+                                #         taC += confusion[i, j]
+                                #         if(i == j):
+                                #             tpC += confusion[i, j]
+                                # print(' = = = train acc so far (with dropout) = {}'.format(tpC / taC))
+                                # with np.printoptions(suppress=True):
+                                #     print('confusion: \n', confusion
+
+                else:
+                    # print('status {} is {}'.format(tii, status[tii]))
+                    pass
+
+        if (len(imBuff[0]) > 0):
+            tResult = True
+            while (tResult):
+                tResult, crtFrames, crtLoss, crtScore, crtConfusion, crtAnnSet = self.trainBuf(imBuff, setSize, stackSize)
+                if (tResult is True):
+                    totalFrames += crtFrames
+                    totalTrains += 1
+                    loss += crtLoss
+                    score += crtScore
+                    confusion += crtConfusion
+                    annSet += crtAnnSet
+
+        tl = []
+        for xx in range(len(imBuff)):
+            tl.append(len(imBuff[xx]))
+        print('current stored set: {} with total = {}'.format(tl, sum(tl)))
+
+        drinkBuffer.clear()
+        for d in imBuff[0]:
+            drinkBuffer.append(d)
+
+        for i in imBuff:
+            i.clear()
+        imBuff.clear()
+        del imBuff
+
+        print(' = after {} images - - - score = {:.2%}, loss = {:.4}, annTotalSet = {}'.format(
+            totalFrames, score/totalTrains, loss/totalTrains, np.uint32(annSet)))
+        tpC = 0
+        taC = 0
+        for i in range(len(confusion)):
+            for j in range(len(confusion[i])):
+                taC += confusion[i, j]
+                if(i == j):
+                    tpC += confusion[i, j]
+        print(' = = = train acc so far (with dropout) = {:.2%}'.format(tpC / taC))
         with np.printoptions(suppress=True):
             print('confusion: \n', confusion)
-            
 
-        if(ti > 0):
-           return tc/ti
+
+        if(totalTrains > 0):
+            return loss/totalTrains
         else:
-           return 0
+            return -1
             
+            
+                
     def train(self, epochs):
         '''
-        Trains the model at :data:`model` for a specified number of epochs. 
+        Trains the model at :data:`model` for a specified number of epochs.
         All but the first the intermediate models are saved.
-        
+
         The process might stop before if the average cost persists under a cetrain threshold for more then 5 steps.
-        
+
         :param epochs: the numer of epochs that will be trained
         :type epochs: int
 
@@ -162,43 +437,42 @@ class TrainModel():
         self.running = True
         minCost = -1
         self.stagnating = 0
+        i = 0
         
         # shuffle(self.trainIntervals)
-        
+        drinkBuffer = []
+
         for i in range(epochs):
-            print('train step ', i)
+            print('train step ', i + self.loadedEpoch, ', with ', len(self.trainIntervals), ' intervals')
             if(self.running):
                 shuffle(self.trainIntervals)
-                
-                avgCost = self.trainEpoch()
+                avgCost = self.trainNewEpoch(i, drinkBuffer)
+
+
                 print('FULL STEP! avg cost is: ', avgCost)
                 
-                if(i > 0):
-                    self.saveModel('step_{}.model'.format(i))
-                if(minCost <= 0):
-                    minCost = avgCost
-                else:
-                    if(minCost - avgCost > 0.001):
-                        print('updated minCost, previously={}'.format(minCost))
-                        minCost = avgCost
-                        self.stagnating = 0
-                    else:
-                        if(self.stagnating < 5):
-                            print('stagnating: {}, crt min still is {}'.format(self.stagnating, minCost))
-                            self.stagnating += 1
-                            # print('updated minCost because of videos (possibly) removed, previously={}'.format(minCost))
-                            # minCost = avgCost
-                        else:
-                            print('cost grew/stagnated, stopping at {}'.format(minCost))
-                            self.running = False
-            else:
-                break
+                if(i + self.loadedEpoch > 0):
+                    self.saveModel('step_{}.model'.format(i + self.loadedEpoch))
+                # self.saveCheckpoint(i, 'check_{}.model'.format(i + self.loadedEpoch))
+                    
+            # if(i > 5):
+            self.scheduler.step()
+            print(' run scheduler at the end of an EPOCH, last computed lr = {}'.format(self.scheduler.get_last_lr()))
             
-            
+        self.saveCheckpoint(i + self.loadedEpoch, 'check_{}.model'.format(i + self.loadedEpoch))
 
     # #TODO: this should be called async
     # def stop(self):
     #     self.running = False
+    def saveCheckpoint(self, epoch, path):
+        print('save checkpoint for epoch {} at {} '.format(epoch, path))
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'loss': self.criterion,
+            # 'scheduler': self.scheduler,
+            }, path)
         
     def saveModel(self, path):
         '''
@@ -239,15 +513,29 @@ class TrainModel():
         import gc
         gc.collect()
         torch.cuda.empty_cache()
-    
+        
+    def countAnn(self):
+        import pandas as pd
+        
+        result = np.zeros(self.noClasses)
+        
+        for i in self.trainIntervals:
+            annFile = i.annFile
+            annData = pd.read_csv(annFile, sep=';', header=1)
+            for x in annData['annotation']:
+                result[x] += 1
+                
+        print('complete annotation data: ', result)
+                
         
 
 if __name__ == "__main__":
     import sys
     
-    # trainVideoPath = '/home/andrei/Videos/2205_trainCropVideos_21/'
+    print('train command: ', sys.argv)
     trainVideoPath = ''
-    
+    testVideoPrefix = ''
+
     if (len(sys.argv) > 1):
         # global trainVideoPath
         print('training folder: ', sys.argv[1])
@@ -256,54 +544,107 @@ if __name__ == "__main__":
         print ('not enough parameters')
         exit(1)
     
+    if (len(sys.argv) > 2):
+        # global trainVideoPath
+        print('test video prefix: ', sys.argv[2])
+        testVideoPrefix = sys.argv[2]
+    else:
+        print ('no video prefix given')
+        exit(1)
+
     log = Logger('train.log')
 
+    modelPath = None
+    if (len(sys.argv) > 3):
+        modelPath = sys.argv[3]
     # modelPath = './mouse.modular.model'
     
-    epochs = 13
+    epochs = 40
+    loadedEpoch = 0
     
     #train
-    trainModel = TrainModel(noClasses, log)
-    
+    trainModel = TrainModel(noClasses, log, modelPath)
+    loadedEpoch = trainModel.loadedEpoch
+    testVideos = []
+
+    #for annFile in glob.glob(trainVideoPath + '*_map_new.csv'):
+    #    videoFile = annFile.replace('_map_new.csv', '.avi')
+    #    trainModel.addTrainInterval(videoFile, annFile)
+
     for videoFile in glob.glob(trainVideoPath + '*.avi'):
-        annFile = videoFile.replace('.avi', '_ann.csv')
-        if(path.exists(annFile)): 
-            trainModel.addTrainInterval(videoFile, annFile)
+        annFile = videoFile.replace('.avi', '_map.csv')
+        newAnnFile = videoFile.replace('.avi', '_map_new.csv')
+        crtAnnFile = annFile
+        if (path.exists(newAnnFile)):
+            crtAnnFile = newAnnFile
+        elif(path.exists(annFile)):
+            crtAnnFile = annFile
         else:
             print('missing data for file ', videoFile)
+            continue
+
+        if(crtAnnFile.find(testVideoPrefix) > 0):
+            testVideos.append((videoFile, crtAnnFile))
+        else:
+            newAnnFile2 = videoFile.replace('.avi', '_map_new_v2.csv')
+            if(path.exists(newAnnFile2)):
+                crtAnnFile = newAnnFile2
+
+            trainModel.addTrainInterval(videoFile, crtAnnFile)
+
+        # newAnnFile = videoFile.replace('.avi', '_map_new.csv')
+        # newAnnFile2 = videoFile.replace('.avi', '_map_new_v2.csv')
+        #
+        # if(path.exists(newAnnFile2)):
+        #     trainModel.addTrainInterval(videoFile, newAnnFile2)
+        # elif(path.exists(newAnnFile)):
+        #     trainModel.addTrainInterval(videoFile, newAnnFile)
+        # if(path.exists(annFile)):
+        #     trainModel.addTrainInterval(videoFile, annFile)
+        # else:
+        #     print('missing data for file ', videoFile)
 
 
+    # # # trainModel.countAnn()
+
+    # # # trainModel.train(epochs)
     trainModel.train(epochs)
-    #trainModel.saveModel(modelPath)
+    # # #trainModel.saveModel(modelPath)
     trainModel.cleanup()
     del trainModel
-    
-    
+
+
     #test    
     dataFolder = ''
     
     if(len(sys.argv) > 2):
         dataFolder = sys.argv[2]
         print('test videos folder: ', sys.argv[2])
-        if(len(sys.argv) > 3):
-            annFolder = sys.argv[3]
-        else:
-            annFolder = dataFolder + '/ann_train'
-        print('test annotations folder: ', annFolder)
-        
-        
-        for x in range(4, epochs):#epochs-10):
+        # if(len(sys.argv) > 3):
+        for x in range(max(2, loadedEpoch), epochs + loadedEpoch):#epochs-10):
             # modelName = 'mouse_v2.model' 
             modelName = 'step_{}.model'.format(x)#epochs - x)
             print(' - - - testing model: {} - - - '.format( modelName))
             testModel = TestModel(noClasses, modelName, log)
-            
-            for crtVideo in glob.glob(dataFolder + '*.avi'):
-                crtAnn = crtVideo.replace('.avi', '.csv')
-                if(path.exists(crtAnn)): 
-                    testModel.addTestInterval(crtVideo, crtAnn)
-                else:
-                    print('missing data for file ', crtVideo)
+
+            for (crtVideo, crtAnn) in testVideos:
+                testModel.addTestInterval(crtVideo, crtAnn)
+
+            # for crtVideo in glob.glob(dataFolder + '*.avi'):
+            #     crtAnn = crtVideo.replace('.avi', '_map.csv')
+            #     newAnn = crtVideo.replace('.avi', '_map_new.csv')
+            #     newAnnFile2 = crtVideo.replace('.avi', '_map_new_v2.csv')
+            #
+            #     # if(path.exists(newAnnFile2)):
+            #     #     #testModel.addTrainInterval(crtVideo, newAnnFile2)
+            #     #     print('not testting with v2 annotations ', newAnnFile2)
+            #     #     #continue
+            #     # if(path.exists(newAnn)):
+            #     #     testModel.addTestInterval(crtVideo, newAnn)
+            #     if(path.exists(crtAnn)):
+            #         testModel.addTestInterval(crtVideo, crtAnn)
+            #     else:
+            #         print('missing data for file ', crtVideo)
                 
             print('added test files')
             testModel.test()
