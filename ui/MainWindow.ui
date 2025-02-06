@@ -37,7 +37,7 @@
      <widget class="QWidget" name="widget" native="true">
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>400</width>
         <height>60</height>
        </size>
       </property>
@@ -60,7 +60,7 @@
        <item>
         <widget class="QPushButton" name="addTaskButton">
          <property name="text">
-          <string>Add video</string>
+          <string>Add single video</string>
          </property>
         </widget>
        </item>
@@ -82,7 +82,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProcessing_Status">
