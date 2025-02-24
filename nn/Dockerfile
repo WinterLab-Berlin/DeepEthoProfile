@@ -11,9 +11,16 @@ ADD ProcessVideo.py /home/nn
 ADD StackFrames.py /home/nn
 ADD FrameSelect.py /home/nn
 
+RUN mkdir /mnt/data && chown dep_user /mnt/data
+USER dep_user
+
 # Enable venv
-ENV PATH="/opt/venv/bin:$PATH"
+#ENV PATH="/opt/venv/bin:$PATH"
 
 ENTRYPOINT python3 ProcComm.py
+
+
+
+
 
 
