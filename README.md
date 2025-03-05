@@ -6,7 +6,7 @@ The solution is based on a CNN that processes video recordings and classifies ea
 <img src="./pics/behaviours_H.jpg" width="700"/>
 
 
-The system was tested to work on a computer running Ubuntu (20.04 or newer) with a NVidia(c) graphic card and CUDA(c) drivers installed. 
+The system was tested to work on a computer running Ubuntu (24.04 or newer) with a NVidia(c) graphic card and CUDA(c) drivers installed. 
 Other required software dependencies are: Docker(c) 20+, Python 3.8+, and PyQt 5+
 
 ## Instalation
@@ -19,7 +19,7 @@ sh DockerBase.sh
 sh Docker.sh
 
 #### Start the application
-sh EthoProfiler.sh
+sh DeepEthoProfile.sh
 
 
 ## Usage
