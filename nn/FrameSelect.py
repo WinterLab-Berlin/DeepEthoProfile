@@ -39,8 +39,11 @@ stackSize: int
 reader: DataReaderAV
 
 
-
+# array used for balancing the behaviors read from the training data
 bf =    [0, 0.6, 0.4, 0, 0.63, 0.63, 0.62, 0]
+
+#previous selections for balancing different train test configurations
+#TODO: this could/should be done automatically
 leave_078_out = [0, 0.73, 0.45, 0, 0.65, 0.65, 0.7, 0]
 leave_06_out =    [0, 0.655, 0.55, 0.1, 0.72, 0.71, 0.72, 0]
 leave_05_out =    [0, 0.65, 0.55, 0.1, 0.7, 0.68, 0.72, 0]
@@ -53,6 +56,9 @@ leave_01_out =    [0, 0.66, 0.49, 0.15, 0.6, 0.6, 0.7, 0.1]
 #split_6 [0, 0.74, 0.65, 0.36, 0.71, 0.7, 0.772, 0.36]
 
 class FrameSelect():
+    '''
+    Helper file for stacking frames and selecting (frame,label) data for training
+    '''
     def __init__(self, logger, videoFile, annFile, offset, stackSize = 11):
         self.logger = logger
         self.videoFile = videoFile

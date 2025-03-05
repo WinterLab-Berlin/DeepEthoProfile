@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score
 
 # from DataReader import DataReader
 from DataReaderAV import DataReaderAV#, mapAnn2
-from StackFrames import  getTestTensors
+# from StackFrames import  getTestTensors
 from Logger import Logger
 from FrameSelect import FrameSelect
 

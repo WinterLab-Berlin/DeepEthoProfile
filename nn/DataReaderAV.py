@@ -22,58 +22,7 @@ av.logging.set_level(av.logging.PANIC)
 
 verbose = False
 
-# def mapAnn(oldAnn):
-#     newAnn = 2
-    
-#     if(oldAnn == 1):                    # old drink
-#         newAnn = 0                      # new drink
-#     elif(oldAnn == 2):                  # old eat
-#         newAnn = 1                      # new eat
-#     elif(oldAnn == 4):                  # old groom 
-#         newAnn = 2                      # new mm
-#     elif(oldAnn == 5):                  # old hang
-#         newAnn = 3                      # new hang
-#     elif(oldAnn == 6):                  # old mm
-#         newAnn = 2                      # new mm
-#     elif(oldAnn == 7):                  # old rear
-#         newAnn = 4                      # new rear
-#     elif(oldAnn == 8):                  # old rest
-#         newAnn = 5                      # new rest
-#     elif(oldAnn == 9):                  # old walk
-#         newAnn = 6                      # new walk
-#     else:
-#         # print('invalid ann: ', oldAnn)
-#         newAnn = 2
-
-#     return newAnn
-
-# def mapAnn2(oldAnn):
-#     newAnn = 2
-    
-#     if(oldAnn == 1):                    # old drink
-#         newAnn = 0                      # new drink
-#     elif(oldAnn == 2):                  # old eat
-#         newAnn = 1                      # new eat
-#     elif(oldAnn == 3):                  # old groom back
-#         newAnn = 2                      # new groom
-#     elif(oldAnn == 4):                  # old groom 
-#         newAnn = 2                      # new groom
-#     elif(oldAnn == 5):                  # old hang
-#         newAnn = 3                      # new hang
-#     elif(oldAnn == 6):                  # old mm
-#         newAnn = 4                      # new mm
-#     elif(oldAnn == 7):                  # old rear
-#         newAnn = 5                      # new rear
-#     elif(oldAnn == 8):                  # old rest
-#         newAnn = 6                      # new rest
-#     elif(oldAnn == 9):                  # old walk
-#         newAnn = 7                      # new walk
-#     else:
-#         # print('invalid ann: ', oldAnn)
-#         newAnn = 2 #defaults to mm
-
-#     return newAnn
-
+# define the LUT for the image contrast enhancement
 maxV = 170
 minV = 10
 
@@ -193,8 +142,7 @@ class DataReaderAV():
         The frames returned are converted to single channel, and the top and bottom part are cropped out.
         The resulting content is converted to a square and scaled to 256*256 pixels. 
         
-        
-        Along with the visual data, the timestamp of the frame is also read from the video file. 
+        Along with the visual data, the timestamp of the frame is also read from the video file.
         This value represents the time that passed from the beginning of the recording, 
         and will typically be the encoding frame, unless the camera shutter time is 
         used at recording time.

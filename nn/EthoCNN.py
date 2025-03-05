@@ -3,7 +3,6 @@
 """
 Defines the CNN that performs the classification
 
-
 @author: Andrei Istudor     andrei.istudor@gmail.com
 """
 import numpy as np
@@ -19,14 +18,14 @@ from random import randint, random
 
 class EthoCNN(nn.Module):
     '''
-    The implmentation of the CNN to each annotate stacked image with the corresponding behaviour. 
+    The implementation of the CNN to each annotate stacked image with the corresponding behaviour.
     The algorithm is designed to function robustly in the context of low distinctive features of the mouse and potential big changes of the environment.
    
-    The images used here have 11 channels corresponding to 11 frames, and are typically obtained with the help of the methods from :mod:`StackFrames`
+    The images used here have 11 channels corresponding to 11 monochromatic frames
     This transforms movement features into image features that are more relevant to behaviour and easier to classify.
     
     The structure is similar to the one from the image classification proposed by Krizhevsky et al. in ImageNet.
-    One major difference (apart from the number of channels) is that the first convolution layer is formed by 4 asymetrical filters that will react
+    One major difference (apart from the number of channels) is that the first convolution layer is formed by 4 asymmetrical filters that will react
     differently to various movement patterns. 
     '''
     

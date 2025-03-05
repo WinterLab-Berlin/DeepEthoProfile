@@ -18,9 +18,8 @@ from FrameSelect import FrameSelect
 
 class ProcessVideo():
     '''
-    Wrapper for the instiating the CNN with a specified model and using it to process a video file. 
-    
-    
+    Wrapper for the instantiating the CNN with a specified model and using it to process a video file.
+
     '''
 
     #: the full path to the video that will be processed by the current instance
@@ -61,9 +60,9 @@ class ProcessVideo():
         performed with a stride of 5 as described in :class:`StackFrames.getTestTensors`. 
         The result is then attributed to the frame in the middle of the interval,
         the 3 frames before, and the 2 frames right after that. 
-        Therefore there are no behaviour bouts  shorter than 240ms. 
-        This is conform to the behaviour definition and 
-        avoides noisy results, while speeding up the processing.
+        Therefore, there are no behaviour bouts shorter than 240ms.
+        This is in conformity to the behaviour definition and
+        avoids noisy results, while speeding up the processing.
         
         The current output contains these behaviours: drink, eat, mm+, hang, rear, rest, and walk
         
