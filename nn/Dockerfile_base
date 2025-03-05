@@ -36,5 +36,10 @@ RUN pip3 install torch torchvision
 USER root
 RUN mkdir /home/nn && chown dep_user /home/nn
 
+
+RUN apt-get autoclean \
+    && apt-get autoremove --purge  -y \
+    && rm -rf /var/lib/apt/lists/* \
+
 WORKDIR /home/nn
 

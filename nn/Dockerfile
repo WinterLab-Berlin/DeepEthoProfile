@@ -8,7 +8,6 @@ ADD mouse_v5.model /home/nn
 ADD ProcComm.py /home/nn
 ADD Logger.py /home/nn
 ADD ProcessVideo.py /home/nn
-ADD StackFrames.py /home/nn
 ADD FrameSelect.py /home/nn
 
 RUN mkdir /mnt/data && chown dep_user /mnt/data
