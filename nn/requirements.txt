@@ -1,0 +1,6 @@
+numpy
+Pandas
+pyav
+scikit-learn
+opencv-python
+torch
