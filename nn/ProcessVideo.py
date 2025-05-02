@@ -96,7 +96,7 @@ class ProcessVideo():
         resultsFile = open(self.outputFile, 'w')
         # resultsFile.write('0:none; 1:drink; 2:eat; 3:groom back; 4:groom; 5:hang; 6:micromovement; 7:rear; 8:rest; 9:walk; v3\n')
         # resultsFile.write('0:drink; 1:eat; 2:mm+; 3:hang; 4:rear; 5:rest; 6:walk; v4\n')
-        resultsFile.write('0:drink; 1:eat; 2:groom; 3:hang; 4:mm; 5:rear; 6:rest; 7:walk; v4\n')
+        resultsFile.write('0:drink; 1:eat; 2:groom; 3:hang; 4:mm; 5:rear; 6:rest; 7:walk; v5\n')
         resultsFile.write('frame;annotation;time\n')
         resultsFile.close()
 
@@ -112,8 +112,6 @@ class ProcessVideo():
 
                     xt = torch.from_numpy(x).float().cuda()
 
-                
-
                     # compute predicted annotations by passing the stacked images to the model
                     # logger.log('CNN')
                     crt_y = model(xt)
@@ -121,7 +119,7 @@ class ProcessVideo():
 
                     final_pred = np.argmax(npPred, axis=1)
 
-                    predex = np.zeros(count * 11, dtype=np.int32)
+                    predex = np.zeros(count * 11, dtype=int)
                     bins = count # int((len(dataSegment) -5)/6)
 
                     # logger.log('unbox')
@@ -130,9 +128,9 @@ class ProcessVideo():
                     # for ia in range(len(final_pred)):
                     #     final_pred[ia] = mapAnn(final_pred[ia])
 
-                    predex[0] = final_pred[0]
-                    predex[1] = final_pred[0]
-                    predex[2] = final_pred[0]
+                    # predex[0] = final_pred[0]
+                    # predex[1] = final_pred[0]
+                    # predex[2] = final_pred[0]
                     for i in range(bins):
                         ii = i * 11 + 5
                         predex[ii-5] = final_pred[i]
@@ -146,9 +144,9 @@ class ProcessVideo():
                         predex[ii+3] = final_pred[i]
                         predex[ii+4] = final_pred[i]
                         predex[ii+5] = final_pred[i]
-                    predex[-3] = final_pred[-1]
-                    predex[-2] = final_pred[-1]
-                    predex[-1] = final_pred[-1]
+                    # predex[-3] = final_pred[-1]
+                    # predex[-2] = final_pred[-1]
+                    # predex[-1] = final_pred[-1]
 
                     # framesA = np.arange(t * self.segSize + 1, (t + 1) * self.segSize + 1, dtype=np.int32)
                     indexes = []

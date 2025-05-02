@@ -103,14 +103,7 @@ class TestInterval():
                         break
                     
                     xt = torch.from_numpy(x).float().cuda()
-                    # bins = len(xt)
-                    # print(bins)
-                    # print(y.shape)
-                    # print('y:', y)
-                    # if(bins < 1):
-                    
-                    # print('frames={}, bins={}, t={}'.format(len(x), bins, t))
-                    
+
                 # Forward pass: Compute predicted y by passing x to the model
                     crt_y = model(xt)
                     npPred = crt_y.data.cpu().numpy()
